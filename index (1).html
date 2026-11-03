@@ -1,0 +1,1204 @@
+<title>DobeFlare</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+  /* Layout: split-pane — intake form left, live score + queue right, stacks on mobile */
+  :root {
+    --bg: #0f1117;
+    --surface: #181c26;
+    --surface-2: #1f2435;
+    --border: #2a2f42;
+    --fg: #e8eaf0;
+    --fg-muted: #8890a6;
+    --accent: #e8522a;
+    --accent-dim: rgba(232,82,42,0.12);
+    --accent-glow: rgba(232,82,42,0.25);
+    --p0: #ff3b3b;
+    --p0-dim: rgba(255,59,59,0.12);
+    --p1: #f59e0b;
+    --p1-dim: rgba(245,158,11,0.12);
+    --p2: #22c55e;
+    --p2-dim: rgba(34,197,94,0.12);
+    --p3: #3b82f6;
+    --p3-dim: rgba(59,130,246,0.12);
+    --font-ui: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    color-scheme: dark;
+  }
+  .faq-section {
+    max-width: 1200px;
+    margin: 32px auto 48px;
+    padding: 0 max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .faq-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .faq-header:hover { background: var(--surface-2); }
+  .faq-title { font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-muted); font-family: var(--font-ui); }
+  .faq-chevron { font-size: 14px; color: var(--fg-muted); transition: transform 0.2s; }
+  .faq-body {
+    margin-top: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 0;
+  }
+  .faq-item {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .faq-item:last-child { border-bottom: none; }
+  .faq-q { font-size: 13px; font-weight: 600; color: var(--fg); margin-bottom: 6px; font-family: var(--font-ui); }
+  .faq-a { font-size: 13px; color: var(--fg-muted); line-height: 1.65; font-family: var(--font-ui); }
+
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #f0f2f7;
+      --surface: #ffffff;
+      --surface-2: #f5f7fb;
+      --border: #dde1ed;
+      --fg: #131620;
+      --fg-muted: #5c647a;
+      --accent: #d44420;
+      --accent-dim: rgba(212,68,32,0.08);
+      --accent-glow: rgba(212,68,32,0.18);
+      --p0: #dc2626;
+      --p0-dim: rgba(220,38,38,0.08);
+      --p1: #d97706;
+      --p1-dim: rgba(217,119,6,0.08);
+      --p2: #16a34a;
+      --p2-dim: rgba(22,163,74,0.08);
+      --p3: #2563eb;
+      --p3-dim: rgba(37,99,235,0.08);
+      color-scheme: light;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #f0f2f7;
+    --surface: #ffffff;
+    --surface-2: #f5f7fb;
+    --border: #dde1ed;
+    --fg: #131620;
+    --fg-muted: #5c647a;
+    --accent: #d44420;
+    --accent-dim: rgba(212,68,32,0.08);
+    --accent-glow: rgba(212,68,32,0.18);
+    --p0: #dc2626;
+    --p0-dim: rgba(220,38,38,0.08);
+    --p1: #d97706;
+    --p1-dim: rgba(217,119,6,0.08);
+    --p2: #16a34a;
+    --p2-dim: rgba(22,163,74,0.08);
+    --p3: #2563eb;
+    --p3-dim: rgba(37,99,235,0.08);
+    color-scheme: light;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 0;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-mark {
+    width: 32px;
+    height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .logo-mark svg { width: 18px; height: 18px; }
+  .logo-name {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+  .logo-name span { color: var(--accent); }
+  .logo-sub {
+    font-size: 11px;
+    color: var(--fg-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .live-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--p2);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--p2);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .queue-count {
+    font-size: 12px;
+    color: var(--fg-muted);
+    font-family: var(--font-mono);
+  }
+
+  /* Main layout */
+  .main {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 20px;
+    padding-block: 20px;
+    flex: 1;
+    align-items: start;
+  }
+  @media (max-width: 820px) {
+    .main { grid-template-columns: 1fr; }
+  }
+
+  /* Panel */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .panel-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .panel-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+  .panel-body { padding: 18px; }
+
+  /* Form */
+  .form-group { margin-bottom: 14px; }
+  .form-group:last-child { margin-bottom: 0; }
+  label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--fg-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  input[type="text"], select, textarea {
+    width: 100%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--fg);
+    font-family: var(--font-ui);
+    font-size: 13px;
+    padding: 9px 12px;
+    outline: none;
+    transition: border-color 0.15s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  input[type="text"]:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+  }
+  textarea { resize: vertical; min-height: 72px; }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238890a6' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 30px;
+  }
+
+  /* Sliders */
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  input[type="range"] {
+    flex: 1;
+    height: 4px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .slider-val {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    min-width: 24px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Checkboxes */
+  .check-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--fg-muted);
+  }
+  .check-item input[type="checkbox"] {
+    accent-color: var(--accent);
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  /* Submit button */
+  .btn-submit {
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 11px;
+    cursor: pointer;
+    margin-top: 16px;
+    letter-spacing: 0.02em;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .btn-submit:hover { opacity: 0.9; }
+  .btn-submit:active { transform: scale(0.99); }
+
+  /* Score card */
+  .score-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .score-body {
+    padding: 20px 18px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .score-ring {
+    flex-shrink: 0;
+    position: relative;
+    width: 96px;
+    height: 96px;
+  }
+  .score-ring svg { width: 96px; height: 96px; transform: rotate(-90deg); }
+  .score-ring-track { fill: none; stroke: var(--border); stroke-width: 7; }
+  .score-ring-fill {
+    fill: none;
+    stroke-width: 7;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.6s cubic-bezier(.4,0,.2,1), stroke 0.3s;
+  }
+  .score-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .score-num {
+    font-family: var(--font-mono);
+    font-size: 26px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .score-max {
+    font-size: 10px;
+    color: var(--fg-muted);
+    margin-top: 2px;
+  }
+  .score-meta { flex: 1; min-width: 0; }
+  .score-tier {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+  }
+  .score-desc {
+    font-size: 12px;
+    color: var(--fg-muted);
+    line-height: 1.5;
+  }
+  .score-sla {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    padding: 4px 8px;
+    border-radius: 5px;
+  }
+
+  /* Factor bars */
+  .factors { padding: 0 18px 18px; }
+  .factor-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 9px;
+  }
+  .factor-label {
+    font-size: 11px;
+    color: var(--fg-muted);
+    width: 130px;
+    flex-shrink: 0;
+  }
+  .factor-bar-bg {
+    flex: 1;
+    height: 5px;
+    background: var(--surface-2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .factor-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--accent);
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  }
+  .factor-score {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--fg-muted);
+    width: 28px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Queue */
+  .queue-list { display: flex; flex-direction: column; gap: 0; }
+  .queue-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+  .queue-item:last-child { border-bottom: none; }
+  .queue-item:hover { background: var(--surface-2); }
+  .queue-item.selected { background: var(--accent-dim); }
+  .q-priority {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    letter-spacing: 0.02em;
+  }
+  .q-body { flex: 1; min-width: 0; }
+  .q-title {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 3px;
+  }
+  .q-meta {
+    font-size: 11px;
+    color: var(--fg-muted);
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .q-score {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+    align-self: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .q-empty {
+    padding: 40px 18px;
+    text-align: center;
+    color: var(--fg-muted);
+    font-size: 13px;
+  }
+  .q-empty-icon { font-size: 28px; margin-bottom: 8px; opacity: 0.5; }
+
+  /* Sample button */
+  .btn-samples {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--fg-muted);
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 7px 12px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+  .btn-samples:hover { background: var(--accent-dim); color: var(--fg); }
+
+  /* Tag */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* Tier colors */
+  .tier-p0 { color: var(--p0); }
+  .tier-p0-bg { background: var(--p0-dim); color: var(--p0); }
+  .tier-p1 { color: var(--p1); }
+  .tier-p1-bg { background: var(--p1-dim); color: var(--p1); }
+  .tier-p2 { color: var(--p2); }
+  .tier-p2-bg { background: var(--p2-dim); color: var(--p2); }
+  .tier-p3 { color: var(--p3); }
+  .tier-p3-bg { background: var(--p3-dim); color: var(--p3); }
+
+  .divider { height: 1px; background: var(--border); margin: 12px 0; }
+
+  .right-col { display: flex; flex-direction: column; gap: 20px; }
+
+  /* Placeholder state */
+  .score-placeholder {
+    padding: 32px 18px;
+    text-align: center;
+    color: var(--fg-muted);
+    font-size: 13px;
+  }
+  .score-placeholder-icon { font-size: 32px; margin-bottom: 10px; opacity: 0.4; }
+
+  /* Score card title */
+  .score-panel-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+  .score-incident-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--fg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 260px;
+    font-style: italic;
+  }
+
+  /* Detail drawer */
+  .detail-drawer {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .detail-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .detail-title {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    flex: 1;
+    min-width: 0;
+  }
+  .detail-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }
+  .detail-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .detail-row-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--fg-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    width: 80px;
+    flex-shrink: 0;
+    padding-top: 1px;
+  }
+  .detail-row-value {
+    font-size: 13px;
+    color: var(--fg);
+    flex: 1;
+    line-height: 1.5;
+  }
+  .detail-notes {
+    font-size: 12px;
+    color: var(--fg-muted);
+    line-height: 1.6;
+    background: var(--surface-2);
+    border-radius: 7px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+  }
+
+  /* Status toggle */
+  .status-toggle {
+    display: flex;
+    gap: 6px;
+  }
+  .status-btn {
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--fg-muted);
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+  }
+  .status-btn:hover { background: var(--accent-dim); color: var(--fg); }
+  .status-btn.active-open { background: var(--p0-dim); color: var(--p0); border-color: var(--p0); }
+  .status-btn.active-inprogress { background: var(--p1-dim); color: var(--p1); border-color: var(--p1); }
+  .status-btn.active-resolved { background: var(--p2-dim); color: var(--p2); border-color: var(--p2); }
+</style>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M9 2L15 6V12L9 16L3 12V6L9 2Z" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M9 6L12 8V12L9 14L6 12V8L9 6Z" fill="white" opacity="0.6"/>
+      </svg>
+    </div>
+    <div>
+      <div class="logo-name">Dobe<span>Flare</span></div>
+      <div class="logo-sub">Incident Priority Engine</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-badge"><div class="live-dot"></div>Live</div>
+    <div class="queue-count" id="queueCountBadge">0 incidents</div>
+  </div>
+</div>
+
+<div class="main">
+  <!-- LEFT: Intake form -->
+  <div>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">New Incident</span>
+        <span class="tag tier-p0-bg" id="livePreviewTier" style="display:none"></span>
+      </div>
+      <div class="panel-body">
+        <div class="form-group">
+          <label>Incident Title</label>
+          <input type="text" id="incTitle" placeholder="Brief description of the incident" oninput="liveScore()">
+        </div>
+
+        <div class="form-group">
+          <label>Threat Category</label>
+          <select id="incCategory" onchange="liveScore()">
+            <option value="">Select category…</option>
+            <option value="malware">Malware / Malicious Code</option>
+            <option value="fraud">Fraud / Financial Abuse</option>
+            <option value="account">Account Compromise</option>
+            <option value="scam">Scams / Social Engineering</option>
+            <option value="content">Content Policy Violation</option>
+            <option value="cib">Coordinated Inauthentic Behavior</option>
+            <option value="ai">AI & Synthetic Media</option>
+            <option value="legal">Legal / Regulatory Escalation</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Estimated Users Affected</label>
+          <select id="incBlast" onchange="liveScore()">
+            <option value="0">Unknown / Contained (&lt;100)</option>
+            <option value="1">Small (100–1K)</option>
+            <option value="2">Medium (1K–100K)</option>
+            <option value="3">Large (100K–1M)</option>
+            <option value="4">Massive (&gt;1M)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Threat Severity <span class="slider-val" id="severityVal">5</span></label>
+          <div class="slider-row">
+            <input type="range" id="incSeverity" min="1" max="10" value="5" oninput="document.getElementById('severityVal').textContent=this.value; liveScore()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Spread Velocity <span class="slider-val" id="velocityVal">5</span></label>
+          <div class="slider-row">
+            <input type="range" id="incVelocity" min="1" max="10" value="5" oninput="document.getElementById('velocityVal').textContent=this.value; liveScore()">
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="form-group">
+          <label>Escalation Flags</label>
+          <div class="check-grid">
+            <label class="check-item"><input type="checkbox" id="flagPress" onchange="liveScore()"> Press / Public</label>
+            <label class="check-item"><input type="checkbox" id="flagLegal" onchange="liveScore()"> Legal / Regulatory</label>
+            <label class="check-item"><input type="checkbox" id="flagExec" onchange="liveScore()"> Executive Flagged</label>
+            <label class="check-item"><input type="checkbox" id="flagRepeat" onchange="liveScore()"> Repeat Pattern</label>
+            <label class="check-item"><input type="checkbox" id="flagLive" onchange="liveScore()"> Active / Live Now</label>
+            <label class="check-item"><input type="checkbox" id="flagXfn" onchange="liveScore()"> XFN Response Needed</label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Notes (optional)</label>
+          <textarea id="incNotes" placeholder="Source, initial findings, links…"></textarea>
+        </div>
+
+        <button class="btn-submit" onclick="submitIncident()">Log Incident → Queue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right-col">
+    <!-- Score card -->
+    <div class="score-card" id="scoreCard">
+      <div class="panel-header">
+        <span class="score-panel-title">Priority Score</span>
+        <span class="score-incident-name" id="scoreIncidentName" style="display:none"></span>
+      </div>
+      <div id="scorePlaceholder" class="score-placeholder">
+        <div class="score-placeholder-icon">⚡</div>
+        Fill in the form to see a live priority score
+      </div>
+      <div id="scoreDisplay" style="display:none">
+        <div class="score-body">
+          <div class="score-ring">
+            <svg viewBox="0 0 96 96">
+              <circle class="score-ring-track" cx="48" cy="48" r="40"/>
+              <circle class="score-ring-fill" id="ringFill" cx="48" cy="48" r="40"
+                stroke-dasharray="251.3"
+                stroke-dashoffset="251.3"/>
+            </svg>
+            <div class="score-center">
+              <div class="score-num" id="scoreNum">0</div>
+              <div class="score-max">/100</div>
+            </div>
+          </div>
+          <div class="score-meta">
+            <div class="score-tier" id="scoreTierLabel">—</div>
+            <div class="score-desc" id="scoreDesc">—</div>
+            <div class="score-sla tag" id="scoreSLA"></div>
+          </div>
+        </div>
+        <div class="factors">
+          <div class="factor-row">
+            <div class="factor-label">Threat Type</div>
+            <div class="factor-bar-bg"><div class="factor-bar-fill" id="bar0" style="width:0%"></div></div>
+            <div class="factor-score" id="bval0">0</div>
+          </div>
+          <div class="factor-row">
+            <div class="factor-label">Blast Radius</div>
+            <div class="factor-bar-bg"><div class="factor-bar-fill" id="bar1" style="width:0%"></div></div>
+            <div class="factor-score" id="bval1">0</div>
+          </div>
+          <div class="factor-row">
+            <div class="factor-label">Severity</div>
+            <div class="factor-bar-bg"><div class="factor-bar-fill" id="bar2" style="width:0%"></div></div>
+            <div class="factor-score" id="bval2">0</div>
+          </div>
+          <div class="factor-row">
+            <div class="factor-label">Velocity</div>
+            <div class="factor-bar-bg"><div class="factor-bar-fill" id="bar3" style="width:0%"></div></div>
+            <div class="factor-score" id="bval3">0</div>
+          </div>
+          <div class="factor-row">
+            <div class="factor-label">Escalation Flags</div>
+            <div class="factor-bar-bg"><div class="factor-bar-fill" id="bar4" style="width:0%"></div></div>
+            <div class="factor-score" id="bval4">0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail drawer (hidden until incident selected) -->
+    <div class="detail-drawer" id="detailDrawer" style="display:none">
+      <div class="detail-header">
+        <div class="detail-title" id="detailTitle"></div>
+        <div class="tag" id="detailTierTag"></div>
+      </div>
+      <div class="detail-body">
+        <div class="detail-row">
+          <div class="detail-row-label">Category</div>
+          <div class="detail-row-value" id="detailCategory"></div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-row-label">Logged</div>
+          <div class="detail-row-value" id="detailTs"></div>
+        </div>
+        <div class="detail-row" id="detailNotesRow" style="display:none">
+          <div class="detail-row-label">Notes</div>
+          <div class="detail-notes" id="detailNotes"></div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-row-label">Status</div>
+          <div class="status-toggle" id="statusToggle">
+            <button class="status-btn" onclick="setStatus('Open')">Open</button>
+            <button class="status-btn" onclick="setStatus('In Progress')">In Progress</button>
+            <button class="status-btn" onclick="setStatus('Resolved')">Resolved</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Queue -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Incident Queue</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn-samples" onclick="loadSamples()">Load examples</button>
+          <button onclick="clearQueue()" style="background:none;border:none;color:var(--fg-muted);font-size:11px;cursor:pointer;font-family:var(--font-ui);">Clear all</button>
+        </div>
+      </div>
+      <div id="queueList" class="queue-list">
+        <div class="q-empty">
+          <div class="q-empty-icon">📋</div>
+          No incidents logged yet
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FAQ -->
+<div class="faq-section">
+  <div class="faq-header" onclick="toggleFaq()">
+    <span class="faq-title">FAQ</span>
+    <span class="faq-chevron" id="faqChevron">▸</span>
+  </div>
+  <div class="faq-body" id="faqBody" style="display:none">
+    <div class="faq-item">
+      <div class="faq-q">What is this?</div>
+      <div class="faq-a">DobeFlare is a demo tool that simulates how a Trust &amp; Safety team triages incoming incidents by severity. Instead of relying on gut feel or whoever escalates the loudest, it scores each incident using a structured model and outputs a priority tier with an SLA target.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">How do I use it?</div>
+      <div class="faq-a">Fill in the incident form on the left — pick a threat category, set blast radius, severity, and velocity sliders, and check any escalation flags that apply. Hit Submit and it scores and queues the incident automatically. Or click "Load examples" to see pre-built scenarios across all four priority tiers.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">How does the scoring work?</div>
+      <div class="faq-a">Each incident is scored out of 100 across five factors: threat category base weight (up to 30 pts), blast radius — how many users or systems are affected (up to 25 pts), severity (up to 20 pts), velocity — how fast it's spreading (up to 15 pts), and escalation flags like press exposure, legal involvement, or executive visibility (up to 12 pts). The total determines the priority tier: P0 ≥ 70, P1 ≥ 45, P2 ≥ 22, P3 below that.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Why those category weights?</div>
+      <div class="faq-a">The weights reflect real-world impact and blast radius potential. Malware (30) and Legal (28) sit highest because they spread fast and carry regulatory or infrastructure consequences. AI &amp; Synthetic (25) and Fraud (22) follow. Content Policy violations (12) sit lowest — still important, but typically contained to specific content with slower spread. The weights aren't arbitrary; they're calibrated to match the urgency a T&amp;S team would assign in practice.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Is this a real production tool?</div>
+      <div class="faq-a">No — it's a portfolio demo. Built to show how I think about incident prioritization structure, not as production software. The scoring model is based on real triage frameworks I worked with across Google and TikTok, adapted into a standalone tool.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Why did you build it?</div>
+      <div class="faq-a">While interviewing for incident response roles, I kept getting asked how I prioritize when everything looks equally urgent. It reminded me of a real problem at Google — multiple P1s landing simultaneously with no structured way to differentiate them beyond gut feel. DobeFlare is the tool I wish we'd had.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const CATEGORY_WEIGHTS = {
+    malware: 30, legal: 28, ai: 25, fraud: 22,
+    account: 20, cib: 18, scam: 16, content: 12, '': 0
+  };
+  const BLAST_WEIGHTS = [0, 5, 12, 20, 25];
+  const TIER_INFO = {
+    P0: { label: 'P0 — Critical', desc: 'Immediate response required. Escalate to leadership now.', sla: '≤ 10 min SLA', cls: 'tier-p0', bgcls: 'tier-p0-bg', ring: '#ff3b3b' },
+    P1: { label: 'P1 — High', desc: 'Same-day response. Assign to senior analyst immediately.', sla: '≤ 2 hr SLA', cls: 'tier-p1', bgcls: 'tier-p1-bg', ring: '#f59e0b' },
+    P2: { label: 'P2 — Medium', desc: 'Standard queue. Address within business day.', sla: '≤ 24 hr SLA', cls: 'tier-p2', bgcls: 'tier-p2-bg', ring: '#22c55e' },
+    P3: { label: 'P3 — Low', desc: 'Routine. Log and monitor. No immediate action needed.', sla: '≤ 72 hr SLA', cls: 'tier-p3', bgcls: 'tier-p3-bg', ring: '#3b82f6' }
+  };
+
+  let incidents = [];
+
+  function calcScore() {
+    const cat = document.getElementById('incCategory').value;
+    const blast = parseInt(document.getElementById('incBlast').value);
+    const sev = parseInt(document.getElementById('incSeverity').value);
+    const vel = parseInt(document.getElementById('incVelocity').value);
+    const flags = ['flagPress','flagLegal','flagExec','flagRepeat','flagLive','flagXfn']
+      .filter(id => document.getElementById(id).checked).length;
+
+    const catScore = CATEGORY_WEIGHTS[cat] || 0;
+    const blastScore = BLAST_WEIGHTS[blast];
+    const sevScore = Math.round((sev / 10) * 20);
+    const velScore = Math.round((vel / 10) * 15);
+    const flagScore = Math.min(flags * 3, 12);
+
+    const total = Math.min(catScore + blastScore + sevScore + velScore + flagScore, 100);
+
+    let tier;
+    if (total >= 70) tier = 'P0';
+    else if (total >= 45) tier = 'P1';
+    else if (total >= 22) tier = 'P2';
+    else tier = 'P3';
+
+    return { total, tier, catScore, blastScore, sevScore, velScore, flagScore };
+  }
+
+  function liveScore() {
+    const cat = document.getElementById('incCategory').value;
+    if (!cat) {
+      document.getElementById('scorePlaceholder').style.display = '';
+      document.getElementById('scoreDisplay').style.display = 'none';
+      document.getElementById('livePreviewTier').style.display = 'none';
+      return;
+    }
+
+    const s = calcScore();
+    renderScore(s);
+
+    const ti = TIER_INFO[s.tier];
+    const lp = document.getElementById('livePreviewTier');
+    lp.textContent = s.tier;
+    lp.className = 'tag ' + ti.bgcls;
+    lp.style.display = '';
+  }
+
+  function renderScore(s) {
+    document.getElementById('scorePlaceholder').style.display = 'none';
+    document.getElementById('scoreDisplay').style.display = '';
+
+    const ti = TIER_INFO[s.tier];
+    const circumference = 251.3;
+    const offset = circumference - (s.total / 100) * circumference;
+
+    document.getElementById('scoreNum').textContent = s.total;
+    document.getElementById('ringFill').style.strokeDashoffset = offset;
+    document.getElementById('ringFill').style.stroke = ti.ring;
+    document.getElementById('scoreTierLabel').textContent = ti.label;
+    document.getElementById('scoreTierLabel').className = 'score-tier ' + ti.cls;
+    document.getElementById('scoreDesc').textContent = ti.desc;
+
+    const sla = document.getElementById('scoreSLA');
+    sla.textContent = ti.sla;
+    sla.className = 'score-sla tag ' + ti.bgcls;
+
+    const maxes = [30, 25, 20, 15, 12];
+    const vals = [s.catScore, s.blastScore, s.sevScore, s.velScore, s.flagScore];
+    vals.forEach((v, i) => {
+      document.getElementById('bar' + i).style.width = (v / maxes[i] * 100) + '%';
+      document.getElementById('bval' + i).textContent = v;
+    });
+  }
+
+  function submitIncident() {
+    const title = document.getElementById('incTitle').value.trim();
+    const cat = document.getElementById('incCategory').value;
+    if (!title) { alert('Please enter an incident title.'); return; }
+    if (!cat) { alert('Please select a threat category.'); return; }
+
+    const s = calcScore();
+    const catLabels = {
+      malware:'Malware',fraud:'Fraud',account:'Account Compromise',
+      scam:'Scam',content:'Content Policy',cib:'CIB',ai:'AI/Synthetic',legal:'Legal'
+    };
+
+    const inc = {
+      id: Date.now(),
+      title,
+      category: catLabels[cat] || cat,
+      notes: document.getElementById('incNotes').value.trim(),
+      score: s.total,
+      tier: s.tier,
+      ts: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})
+    };
+
+    incidents.push(inc);
+    incidents.sort((a, b) => b.score - a.score);
+    renderQueue();
+    resetForm();
+  }
+
+  function renderQueue() {
+    const list = document.getElementById('queueList');
+    document.getElementById('queueCountBadge').textContent =
+      incidents.length + ' incident' + (incidents.length !== 1 ? 's' : '');
+
+    if (!incidents.length) {
+      list.innerHTML = '<div class="q-empty"><div class="q-empty-icon">📋</div>No incidents logged yet</div>';
+      return;
+    }
+
+    list.innerHTML = incidents.map((inc, idx) => {
+      const ti = TIER_INFO[inc.tier];
+      const status = inc.status || 'Open';
+      const statusCls = status === 'Resolved' ? 'tier-p2' : status === 'In Progress' ? 'tier-p1' : 'tier-p0';
+      return `
+        <div class="queue-item" onclick="selectIncident(${idx})">
+          <div class="q-priority ${ti.bgcls}">${inc.tier}</div>
+          <div class="q-body">
+            <div class="q-title">${escHtml(inc.title)}</div>
+            <div class="q-meta">
+              <span>${escHtml(inc.category)}</span>
+              <span>·</span>
+              <span>${inc.ts}</span>
+              <span>·</span>
+              <span class="${statusCls}" style="font-weight:600">${status}</span>
+            </div>
+          </div>
+          <div class="q-score ${ti.cls}">${inc.score}</div>
+        </div>`;
+    }).join('');
+  }
+
+  let selectedIdx = null;
+
+  function selectIncident(idx) {
+    selectedIdx = idx;
+    const inc = incidents[idx];
+    document.querySelectorAll('.queue-item').forEach((el, i) => {
+      el.classList.toggle('selected', i === idx);
+    });
+
+    // Score panel — show incident name in header
+    document.getElementById('scorePlaceholder').style.display = 'none';
+    document.getElementById('scoreDisplay').style.display = '';
+    const nameEl = document.getElementById('scoreIncidentName');
+    nameEl.textContent = inc.title;
+    nameEl.style.display = '';
+
+    const ti = TIER_INFO[inc.tier];
+    const circumference = 251.3;
+    const offset = circumference - (inc.score / 100) * circumference;
+    document.getElementById('scoreNum').textContent = inc.score;
+    document.getElementById('ringFill').style.strokeDashoffset = offset;
+    document.getElementById('ringFill').style.stroke = ti.ring;
+    document.getElementById('scoreTierLabel').textContent = ti.label;
+    document.getElementById('scoreTierLabel').className = 'score-tier ' + ti.cls;
+    document.getElementById('scoreDesc').textContent = ti.desc;
+    const sla = document.getElementById('scoreSLA');
+    sla.textContent = ti.sla;
+    sla.className = 'score-sla tag ' + ti.bgcls;
+
+    // Detail drawer
+    const drawer = document.getElementById('detailDrawer');
+    drawer.style.display = '';
+    document.getElementById('detailTitle').textContent = inc.title;
+    const tierTag = document.getElementById('detailTierTag');
+    tierTag.textContent = inc.tier;
+    tierTag.className = 'tag ' + ti.bgcls;
+    document.getElementById('detailCategory').textContent = inc.category;
+    document.getElementById('detailTs').textContent = inc.ts;
+    const notesRow = document.getElementById('detailNotesRow');
+    if (inc.notes) {
+      notesRow.style.display = '';
+      document.getElementById('detailNotes').textContent = inc.notes;
+    } else {
+      notesRow.style.display = 'none';
+    }
+
+    // Status buttons
+    const status = inc.status || 'Open';
+    const statusMap = { 'Open': 'active-open', 'In Progress': 'active-inprogress', 'Resolved': 'active-resolved' };
+    document.querySelectorAll('.status-btn').forEach(btn => {
+      btn.className = 'status-btn';
+      if (btn.textContent === status) btn.classList.add(statusMap[status]);
+    });
+  }
+
+  function setStatus(status) {
+    if (selectedIdx === null) return;
+    incidents[selectedIdx].status = status;
+    // Update buttons
+    const statusMap = { 'Open': 'active-open', 'In Progress': 'active-inprogress', 'Resolved': 'active-resolved' };
+    document.querySelectorAll('.status-btn').forEach(btn => {
+      btn.className = 'status-btn';
+      if (btn.textContent === status) btn.classList.add(statusMap[status]);
+    });
+    // Refresh queue to show status tag
+    const prevIdx = selectedIdx;
+    renderQueue();
+    // Re-highlight selected row
+    document.querySelectorAll('.queue-item')[prevIdx]?.classList.add('selected');
+  }
+
+  function clearQueue() {
+    incidents = [];
+    selectedIdx = null;
+    renderQueue();
+    document.getElementById('scorePlaceholder').style.display = '';
+    document.getElementById('scoreDisplay').style.display = 'none';
+    document.getElementById('livePreviewTier').style.display = 'none';
+    document.getElementById('scoreIncidentName').style.display = 'none';
+    document.getElementById('detailDrawer').style.display = 'none';
+  }
+
+  function resetForm() {
+    document.getElementById('incTitle').value = '';
+    document.getElementById('incCategory').value = '';
+    document.getElementById('incBlast').value = '0';
+    document.getElementById('incSeverity').value = '5';
+    document.getElementById('incVelocity').value = '5';
+    document.getElementById('severityVal').textContent = '5';
+    document.getElementById('velocityVal').textContent = '5';
+    document.getElementById('incNotes').value = '';
+    ['flagPress','flagLegal','flagExec','flagRepeat','flagLive','flagXfn']
+      .forEach(id => document.getElementById(id).checked = false);
+    document.getElementById('scorePlaceholder').style.display = '';
+    document.getElementById('scoreDisplay').style.display = 'none';
+    document.getElementById('livePreviewTier').style.display = 'none';
+  }
+
+  const SAMPLE_INCIDENTS = [
+    {
+      title: 'Joker malware campaign — 500K+ devices affected',
+      category: 'Malware', score: 88, tier: 'P0',
+      ts: '08:14 AM',
+      notes: 'Malicious SDK injecting hidden subscription charges. Confirmed C2 communication. Engineering engaged.'
+    },
+    {
+      title: 'AI-generated CSAM flagged by hash match',
+      category: 'AI/Synthetic', score: 85, tier: 'P0',
+      ts: '09:02 AM',
+      notes: 'PhotoDNA match on synthetic image. Account suspended. NCMEC report filed.'
+    },
+    {
+      title: 'Adobe Firefly assets used in unauthorized political ad campaign',
+      category: 'AI/Synthetic', score: 61, tier: 'P1',
+      ts: '10:30 AM',
+      notes: 'Firefly-generated creative assets repurposed without license in paid political campaign. Press flagged. Legal reviewing takedown options.'
+    },
+    {
+      title: 'Phishing DM campaign targeting payment credentials',
+      category: 'Scam', score: 57, tier: 'P1',
+      ts: '11:45 AM',
+      notes: 'Coordinated wave of DMs impersonating support team. ~8K users targeted. Active now.'
+    },
+    {
+      title: 'Coordinated fake review network — 12 seller accounts',
+      category: 'CIB', score: 50, tier: 'P1',
+      ts: '01:18 PM',
+      notes: 'Network of linked accounts inflating seller ratings. XFN: Policy, Trust, Marketplace.'
+    },
+    {
+      title: 'Mass TOS violation — political ad without disclosure',
+      category: 'Content Policy', score: 30, tier: 'P2',
+      ts: '02:55 PM',
+      notes: 'Political ad running without required transparency label. Single advertiser, contained.'
+    },
+    {
+      title: 'Single chargeback dispute — $200 event refund',
+      category: 'Fraud', score: 14, tier: 'P3',
+      ts: '03:40 PM',
+      notes: 'Buyer claiming unauthorized purchase. Standard dispute workflow.'
+    },
+  ];
+
+  function loadSamples() {
+    // Merge: add samples not already in queue (match by title)
+    const existingTitles = new Set(incidents.map(i => i.title));
+    SAMPLE_INCIDENTS.forEach(s => {
+      if (!existingTitles.has(s.title)) {
+        incidents.push({ ...s, id: Date.now() + Math.random() });
+      }
+    });
+    incidents.sort((a, b) => b.score - a.score);
+    renderQueue();
+    // Show score for top incident
+    if (incidents.length > 0) selectIncident(0);
+  }
+
+  // Auto-load samples on page open
+  window.addEventListener('DOMContentLoaded', () => { loadSamples(); });
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function toggleFaq() {
+    const body = document.getElementById('faqBody');
+    const chevron = document.getElementById('faqChevron');
+    const open = body.style.display === 'none';
+    body.style.display = open ? 'block' : 'none';
+    chevron.textContent = open ? '▾' : '▸';
+  }
+</script>
