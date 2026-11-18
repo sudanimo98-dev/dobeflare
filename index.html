@@ -910,6 +910,170 @@
     font-family: var(--font-ui);
   }
   .wt-step-text strong { color: var(--fg); }
+
+  /* Lifecycle timeline */
+  .wt-lifecycle {
+    padding: 24px 24px 28px;
+    border-top: 1px solid var(--border);
+  }
+  .wt-lifecycle-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    margin-bottom: 24px;
+    font-family: var(--font-ui);
+  }
+  .wt-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .wt-phase {
+    display: flex;
+    gap: 0;
+    position: relative;
+  }
+  .wt-phase-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 36px;
+    flex-shrink: 0;
+  }
+  .wt-phase-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 2px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    font-family: var(--font-mono);
+    flex-shrink: 0;
+    z-index: 1;
+  }
+  .wt-phase-line {
+    width: 2px;
+    flex: 1;
+    background: var(--border);
+    min-height: 20px;
+  }
+  .wt-phase:last-child .wt-phase-line {
+    display: none;
+  }
+  .wt-phase-content {
+    padding: 0 0 28px 16px;
+    flex: 1;
+    min-width: 0;
+  }
+  .wt-phase-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--fg);
+    margin-bottom: 2px;
+    font-family: var(--font-ui);
+    padding-top: 6px;
+  }
+  .wt-phase-time {
+    font-size: 11px;
+    color: var(--accent);
+    font-family: var(--font-mono);
+    margin-bottom: 10px;
+  }
+  .wt-phase-body {
+    font-size: 13px;
+    color: var(--fg-muted);
+    line-height: 1.65;
+    font-family: var(--font-ui);
+  }
+  .wt-phase-body strong { color: var(--fg); }
+  .wt-phase-body a { color: var(--accent); text-decoration: underline; }
+  .wt-xfn-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  @media (max-width: 600px) {
+    .wt-xfn-grid { grid-template-columns: 1fr; }
+  }
+  .wt-xfn-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .wt-xfn-team {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+    font-family: var(--font-ui);
+  }
+  .wt-xfn-actions {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .wt-xfn-actions li {
+    font-size: 12px;
+    color: var(--fg-muted);
+    line-height: 1.5;
+    padding-left: 12px;
+    position: relative;
+    font-family: var(--font-ui);
+  }
+  .wt-xfn-actions li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-size: 10px;
+  }
+  .wt-pir-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .wt-pir-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .wt-pir-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--fg-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 7px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-family: var(--font-ui);
+  }
+  .wt-pir-text {
+    font-size: 12px;
+    color: var(--fg-muted);
+    line-height: 1.6;
+    font-family: var(--font-ui);
+  }
+  .wt-pir-text strong { color: var(--fg); }
 </style>
 
 <div class="header">
@@ -1260,26 +1424,176 @@
       </div>
     </div>
 
-    <!-- Analyst Reasoning -->
-    <div class="wt-reasoning">
-      <div class="wt-reasoning-label">Analyst Reasoning — Why This Scores P0</div>
-      <div class="wt-reasoning-steps">
-        <div class="wt-step">
-          <div class="wt-step-num">1</div>
-          <div class="wt-step-text"><strong>Blast radius looks small — but velocity overrides it.</strong> At 340 accounts, this sits in the Small tier (100–1K), which only contributes 5 pts to blast radius. However, those 340 accounts were accessed in under 11 minutes across 4 IP clusters. That's not a manual attack — it's automated credential stuffing at scale. Velocity scores 8/10, reflecting an active, accelerating threat that could reach thousands more accounts before containment.</div>
+    <!-- Lifecycle Timeline -->
+    <div class="wt-lifecycle">
+      <div class="wt-lifecycle-label">Incident Response Lifecycle</div>
+      <div class="wt-timeline">
+
+        <!-- Phase 1: Detection -->
+        <div class="wt-phase">
+          <div class="wt-phase-left">
+            <div class="wt-phase-dot">1</div>
+            <div class="wt-phase-line"></div>
+          </div>
+          <div class="wt-phase-content">
+            <div class="wt-phase-title">Detection</div>
+            <div class="wt-phase-time">T+0:00 — 07:41 AM</div>
+            <div class="wt-phase-body">
+              Automated velocity alert fired after 340 successful logins from 4 distinct IP clusters within an 11-minute window — well outside normal user behavior thresholds. Secondary signals confirmed: payment method change rate spiked to 18% of session volume (baseline &lt;0.3%), and Adobe Sign API recorded 60 contract executions in rapid succession across unrelated accounts. No single signal would have triggered a P0 alone; the combination of login velocity, payment mutation rate, and contract anomaly pattern elevated the alert to critical.
+            </div>
+          </div>
         </div>
-        <div class="wt-step">
-          <div class="wt-step-num">2</div>
-          <div class="wt-step-text"><strong>Severity is near-maximum because of downstream financial harm.</strong> Account compromise alone would score moderate severity. Here, 18% of compromised accounts had payment methods swapped within the session — meaning attackers moved from access to financial abuse in real time. 60 fraudulent Adobe Sign contracts executed on behalf of real users constitutes a direct violation of Adobe's <a href="https://www.adobe.com/trust/transparency/content-policies/authenticity.html" target="_blank" style="color:var(--accent);text-decoration:underline">Authenticity: Fraud policy</a> — content used to deceive users into transactions is explicitly prohibited across all Adobe products and services. Severity scores 9/10.</div>
+
+        <!-- Phase 2: Assessment -->
+        <div class="wt-phase">
+          <div class="wt-phase-left">
+            <div class="wt-phase-dot">2</div>
+            <div class="wt-phase-line"></div>
+          </div>
+          <div class="wt-phase-content">
+            <div class="wt-phase-title">Assessment</div>
+            <div class="wt-phase-time">T+0:08 — 07:49 AM</div>
+            <div class="wt-phase-body">
+              DobeFlare scored the incident at <strong>83/100 → P0 Critical</strong> based on: Account Compromise category (20 pts), Small blast radius (5 pts), severity 9/10 for active financial harm (18 pts), velocity 8/10 for automated attack pace (12 pts), and 3 escalation flags — Legal, XFN, Active (9 pts). XFN response initiated immediately across five teams:
+              <div class="wt-xfn-grid">
+                <div class="wt-xfn-card">
+                  <div class="wt-xfn-team">Engineering</div>
+                  <ul class="wt-xfn-actions">
+                    <li>Block 4 identified IP clusters at edge layer</li>
+                    <li>Identify MFA re-auth gap on payment changes</li>
+                    <li>Pull session logs for affected accounts</li>
+                    <li>Assess broader exposure beyond 340 accounts</li>
+                  </ul>
+                </div>
+                <div class="wt-xfn-card">
+                  <div class="wt-xfn-team">Legal</div>
+                  <ul class="wt-xfn-actions">
+                    <li>Review 60 fraudulent Adobe Sign contracts for validity</li>
+                    <li>Assess liability exposure under <a href="https://www.adobe.com/trust/transparency/content-policies/authenticity.html" target="_blank">Authenticity: Fraud policy</a></li>
+                    <li>Determine notification obligations (GDPR, CCPA)</li>
+                    <li>Advise on contract voiding process</li>
+                  </ul>
+                </div>
+                <div class="wt-xfn-card">
+                  <div class="wt-xfn-team">Customer Trust</div>
+                  <ul class="wt-xfn-actions">
+                    <li>Draft victim notification templates</li>
+                    <li>Coordinate account recovery workflows</li>
+                    <li>Monitor support ticket volume for downstream reports</li>
+                    <li>Manage public-facing comms if press escalation occurs</li>
+                  </ul>
+                </div>
+                <div class="wt-xfn-card">
+                  <div class="wt-xfn-team">Security / InfoSec</div>
+                  <ul class="wt-xfn-actions">
+                    <li>Identify credential breach source (third-party dataset)</li>
+                    <li>Cross-reference IPs against threat intel feeds</li>
+                    <li>Assess whether attack tooling is known / commoditized</li>
+                    <li>Determine if additional Adobe services are exposed</li>
+                  </ul>
+                </div>
+                <div class="wt-xfn-card">
+                  <div class="wt-xfn-team">Policy</div>
+                  <ul class="wt-xfn-actions">
+                    <li>Confirm policy violation classification (Authenticity: Fraud)</li>
+                    <li>Review account security policy for step-up auth gaps</li>
+                    <li>Flag for post-incident policy update review</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="wt-step">
-          <div class="wt-step-num">3</div>
-          <div class="wt-step-text"><strong>Three escalation flags compound the base score.</strong> Active / Live Now means the attack window is open — accounts are still at risk while this is being triaged. Legal / Regulatory fires because executed contracts under stolen credentials create potential fraud liability. XFN Response Needed triggers because Engineering (MFA gap), Legal (contract validity), and Customer Trust (victim notification) all need to move in parallel. Each flag adds to the score; together they push total above the P0 threshold of 70.</div>
+
+        <!-- Phase 3: Containment -->
+        <div class="wt-phase">
+          <div class="wt-phase-left">
+            <div class="wt-phase-dot">3</div>
+            <div class="wt-phase-line"></div>
+          </div>
+          <div class="wt-phase-content">
+            <div class="wt-phase-title">Containment</div>
+            <div class="wt-phase-time">T+0:22 — 08:03 AM</div>
+            <div class="wt-phase-body">
+              All 340 compromised accounts suspended and flagged for forced password reset. 4 IP clusters blocked at the network edge. Adobe Sign contracts executed during the attack window placed in legal hold pending review. Payment method changes made during the attack window reversed. Session tokens for affected accounts invalidated to terminate any active attacker sessions. Rate limiting applied globally on payment method change endpoints as an interim control pending the MFA fix.
+            </div>
+          </div>
         </div>
-        <div class="wt-step">
-          <div class="wt-step-num">4</div>
-          <div class="wt-step-text"><strong>The MFA re-auth gap is the structural finding that changes the response.</strong> This isn't just a one-time compromise — it's evidence of a platform vulnerability. Payment method changes not requiring re-authentication is a systemic issue. That escalates the incident from "contain these 340 accounts" to "emergency engineering fix + policy review + broader exposure assessment." A P0 isn't just about current damage; it's about rate of potential damage if unaddressed.</div>
+
+        <!-- Phase 4: Investigation -->
+        <div class="wt-phase">
+          <div class="wt-phase-left">
+            <div class="wt-phase-dot">4</div>
+            <div class="wt-phase-line"></div>
+          </div>
+          <div class="wt-phase-content">
+            <div class="wt-phase-title">Investigation</div>
+            <div class="wt-phase-time">T+1:15 — 08:56 AM</div>
+            <div class="wt-phase-body">
+              Credential analysis confirmed attack used a third-party breach dataset (non-Adobe source) in a classic credential stuffing pattern — no internal data breach. 340 accounts confirmed compromised; broader scan identified 12 additional accounts with suspicious payment mutations not yet flagged by the original alert. IP cluster attribution linked to a known automated fraud-as-a-service operation. <strong>Critical finding:</strong> Adobe's account security policy did not require re-authentication for payment method changes within an authenticated session — a gap that enabled the entire financial abuse chain. Without this gap, attackers would have been blocked from swapping payment info even with valid credentials.
+            </div>
+          </div>
         </div>
+
+        <!-- Phase 5: Remediation & Recovery -->
+        <div class="wt-phase">
+          <div class="wt-phase-left">
+            <div class="wt-phase-dot">5</div>
+            <div class="wt-phase-line"></div>
+          </div>
+          <div class="wt-phase-content">
+            <div class="wt-phase-title">Remediation &amp; Recovery</div>
+            <div class="wt-phase-time">T+4:00 — 11:41 AM</div>
+            <div class="wt-phase-body">
+              Engineering deployed step-up MFA re-authentication requirement for all payment method changes — patch applied to production within 4 hours. 352 affected accounts (340 original + 12 from expanded scan) restored via guided recovery flow with identity verification. 60 fraudulent Adobe Sign contracts voided by Legal; counterparties notified. Affected users received direct notification with explanation, recovery steps, and credit for service disruption. Threat intel on attacker IPs and tooling shared with Adobe Security's threat feed for future detection.
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase 6: Post-Incident Follow-Up -->
+        <div class="wt-phase">
+          <div class="wt-phase-left">
+            <div class="wt-phase-dot">6</div>
+            <div class="wt-phase-line"></div>
+          </div>
+          <div class="wt-phase-content">
+            <div class="wt-phase-title">Post-Incident Follow-Up</div>
+            <div class="wt-phase-time">T+48h — Post-Incident Review</div>
+            <div class="wt-phase-body">
+              <div class="wt-pir-list">
+                <div class="wt-pir-item">
+                  <div class="wt-pir-label">Damage &amp; Cost</div>
+                  <div class="wt-pir-text">352 accounts compromised; 60 fraudulent contracts executed; estimated $14K in reversed payment transactions. Engineering remediation cost: ~40 eng-hours. Customer Trust recovery effort: ~80 hours across account recovery and comms. Legal review: ~12 hours. Total estimated cost: ~$28K fully loaded.</div>
+                </div>
+                <div class="wt-pir-item">
+                  <div class="wt-pir-label">Policy Gap</div>
+                  <div class="wt-pir-text"><strong>Yes — a preventable gap.</strong> Account security policy did not mandate step-up re-authentication for sensitive account mutations (payment method, email, recovery contact). Had this requirement existed, the financial abuse chain would have been blocked even after credential compromise. Policy updated to require MFA re-auth for all Tier 1 account changes.</div>
+                </div>
+                <div class="wt-pir-item">
+                  <div class="wt-pir-label">Procedure Failure</div>
+                  <div class="wt-pir-text">Initial velocity alert fired but was initially routed to Tier 1 analyst queue rather than auto-escalating on payment mutation co-signal. Runbook updated to treat payment method spike + login velocity as a compound P0 trigger requiring immediate senior analyst assignment, bypassing Tier 1 triage.</div>
+                </div>
+                <div class="wt-pir-item">
+                  <div class="wt-pir-label">Response Quality</div>
+                  <div class="wt-pir-text">XFN coordination was effective once escalated; Engineering patch deployed within SLA. Gap: 8-minute delay between initial alert and P0 declaration due to routing issue above. T+0:22 containment met the ≤10 min SLA from declaration, not from first signal — SLA definition to be reviewed for compound-signal incidents.</div>
+                </div>
+                <div class="wt-pir-item">
+                  <div class="wt-pir-label">Comms Timeliness</div>
+                  <div class="wt-pir-text">Internal stakeholders (Engineering, Legal, Customer Trust, Policy, Security) all notified within 10 minutes of P0 declaration. Affected user notifications sent within 6 hours of containment — within GDPR 72-hour window. No press escalation occurred; proactive comms prep was not needed but was ready.</div>
+                </div>
+                <div class="wt-pir-item">
+                  <div class="wt-pir-label">Re-infection Risk</div>
+                  <div class="wt-pir-text">Low. MFA step-up patch closes the primary exploitation vector. Attacker IPs blocklisted. Credential stuffing dataset identified — impacted users prompted to change passwords not just on Adobe but advised on reuse risk. Rate limiting on payment endpoints remains as a defense-in-depth layer.</div>
+                </div>
+                <div class="wt-pir-item">
+                  <div class="wt-pir-label">Lessons Learned</div>
+                  <div class="wt-pir-text">Single-signal alert thresholds are insufficient for compound attack patterns. Payment mutation rate should have been a co-primary signal from day one. Step-up authentication on sensitive account mutations is table-stakes security hygiene — this gap should have been caught in a security review. Post-incident: all Tier 1 account mutations now require re-auth; compound-signal detection added to alert ruleset; runbook revised to reflect multi-signal P0 criteria.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 
