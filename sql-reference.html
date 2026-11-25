@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Fraud Investigation SQL</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --bg2: #1a1a1a;
+    --bg3: #242424;
+    --border: #2a2a2a;
+    --fg: #e8e8e8;
+    --fg2: #888;
+    --accent: #e8522a;
+    --accent-dim: rgba(232,82,42,0.08);
+    --green: #4ade80;
+    --yellow: #f59e0b;
+    --red: #ef4444;
+    --keyword: #818cf8;
+    --fn: #60a5fa;
+    --str: #34d399;
+    --num: #fb923c;
+    --cmt: #555;
+    --font-mono: 'JetBrains Mono', monospace;
+    color-scheme: dark;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 52px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .header-logo {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    font-family: var(--font-mono);
+    letter-spacing: 0.04em;
+    text-decoration: none;
+  }
+  .header-divider { color: var(--border); font-size: 18px; }
+  .header-title { font-size: 13px; font-weight: 600; color: var(--fg); }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .back-link {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    text-decoration: none;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--accent-dim);
+    border: 1px solid rgba(232,82,42,0.3);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .back-link:hover { background: rgba(232,82,42,0.2); border-color: var(--accent); }
+  .context-badge {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--fg2);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-family: var(--font-mono);
+  }
+
+  /* Tab nav */
+  .tab-nav {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 0 24px;
+  }
+  .tab-nav::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    padding: 10px 16px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--fg2);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+    letter-spacing: 0.02em;
+  }
+  .tab-btn:hover { color: var(--fg); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* Main */
+  .main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* Section headers */
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+    font-family: var(--font-mono);
+  }
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--fg);
+    margin-bottom: 8px;
+  }
+  .lead {
+    color: var(--fg2);
+    font-size: 14px;
+    margin-bottom: 28px;
+    max-width: 65ch;
+    line-height: 1.7;
+  }
+
+  /* Schema cards */
+  .schema-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 600px) { .schema-grid { grid-template-columns: 1fr; } }
+
+  .schema-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .schema-card-header {
+    background: var(--bg3);
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .table-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+  .table-name {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--fg);
+  }
+  .schema-fields {
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .field-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  .field-name { color: var(--fg); min-width: 170px; }
+  .field-type { color: var(--num); }
+  .field-note { color: var(--cmt); font-size: 11px; }
+
+  /* Annotations */
+  .annotation-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .annotation {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px 14px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+  }
+  .annotation-text {
+    font-size: 13px;
+    color: var(--fg2);
+    line-height: 1.65;
+  }
+  .annotation-text strong { color: var(--fg); font-weight: 600; }
+  .annotation-text code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--str);
+    background: var(--bg3);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  /* Query blocks */
+  .query-block {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .query-header {
+    background: var(--bg3);
+    padding: 9px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  .query-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--fg2);
+  }
+  .copy-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--fg2);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 3px 10px;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .copy-btn.copied { color: var(--accent); border-color: var(--accent); }
+
+  .code-wrap { overflow-x: auto; }
+  pre {
+    padding: 18px 20px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.75;
+    color: var(--fg);
+    white-space: pre;
+    min-width: 0;
+  }
+
+  .kw  { color: var(--keyword); font-weight: 500; }
+  .fn  { color: var(--fn); }
+  .str { color: var(--str); }
+  .num { color: var(--num); }
+  .cmt { color: var(--cmt); font-style: italic; }
+
+  /* Outcome */
+  .outcome-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 600px) { .outcome-grid { grid-template-columns: 1fr; } }
+
+  .outcome-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+  }
+  .outcome-card.red   { border-color: var(--red); }
+  .outcome-card.amber { border-color: var(--yellow); }
+  .outcome-card.green { border-color: var(--green); }
+  .outcome-num {
+    font-size: 26px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    margin-bottom: 4px;
+  }
+  .outcome-card.red   .outcome-num { color: var(--red); }
+  .outcome-card.amber .outcome-num { color: var(--yellow); }
+  .outcome-card.green .outcome-num { color: var(--green); }
+  .outcome-label { font-size: 12px; color: var(--fg2); line-height: 1.5; }
+
+  .narrative {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 20px 22px;
+  }
+  .narrative p {
+    font-size: 14px;
+    color: var(--fg2);
+    line-height: 1.8;
+    margin-bottom: 14px;
+  }
+  .narrative p:last-child { margin-bottom: 0; }
+  .narrative p strong { color: var(--fg); }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <a class="header-logo" href="index.html">DobeFlare</a>
+    <span class="header-divider">/</span>
+    <span class="header-title">Fraud Investigation SQL</span>
+  </div>
+  <div class="header-right">
+    <span class="context-badge">Eventbrite · Nigerian IP Cluster</span>
+    <a class="back-link" href="index.html">← DobeFlare</a>
+  </div>
+</header>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" data-tab="schema">Schema</button>
+  <button class="tab-btn" data-tab="query1">Step 1 — Event Cluster</button>
+  <button class="tab-btn" data-tab="query2">Step 2 — Organizer Rollup</button>
+  <button class="tab-btn" data-tab="outcome">Outcome</button>
+</nav>
+
+<main class="main">
+
+  <!-- SCHEMA -->
+  <div class="tab-panel active" id="tab-schema">
+    <div class="section-label">Data Model</div>
+    <h2>Table Schema</h2>
+    <p class="lead">Two tables joined across the investigation: fraud queue signals from the Trust & Safety team, and payment transaction records from the payments team.</p>
+
+    <div class="schema-grid">
+      <div class="schema-card">
+        <div class="schema-card-header">
+          <div class="table-dot"></div>
+          <span class="table-name">fraud_queue</span>
+        </div>
+        <div class="schema-fields">
+          <div class="field-row"><span class="field-name">event_id</span><span class="field-type">VARCHAR(20)</span></div>
+          <div class="field-row"><span class="field-name">organizer_id</span><span class="field-type">VARCHAR(20)</span></div>
+          <div class="field-row"><span class="field-name">flag_date</span><span class="field-type">DATE</span></div>
+          <div class="field-row"><span class="field-name">risk_score</span><span class="field-type">DECIMAL(3,2)</span><span class="field-note">0.00–1.00</span></div>
+          <div class="field-row"><span class="field-name">ip_country</span><span class="field-type">VARCHAR(50)</span></div>
+          <div class="field-row"><span class="field-name">flag_reason</span><span class="field-type">VARCHAR(100)</span></div>
+        </div>
+      </div>
+
+      <div class="schema-card">
+        <div class="schema-card-header">
+          <div class="table-dot"></div>
+          <span class="table-name">payments_transactions</span>
+        </div>
+        <div class="schema-fields">
+          <div class="field-row"><span class="field-name">transaction_id</span><span class="field-type">VARCHAR(20)</span></div>
+          <div class="field-row"><span class="field-name">event_id</span><span class="field-type">VARCHAR(20)</span></div>
+          <div class="field-row"><span class="field-name">attendee_id</span><span class="field-type">VARCHAR(20)</span></div>
+          <div class="field-row"><span class="field-name">organizer_id</span><span class="field-type">VARCHAR(20)</span></div>
+          <div class="field-row"><span class="field-name">txn_date</span><span class="field-type">DATE</span></div>
+          <div class="field-row"><span class="field-name">amount_usd</span><span class="field-type">DECIMAL(10,2)</span></div>
+          <div class="field-row"><span class="field-name">chargeback_eligible</span><span class="field-type">BOOLEAN</span><span class="field-note">FALSE = past 14-day window</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="annotation-list">
+      <div class="annotation">
+        <div class="annotation-text"><strong>Join key:</strong> <code>event_id</code> links fraud signals to their payment activity. <code>organizer_id</code> is used in Step 2 to roll up across connected accounts.</div>
+      </div>
+      <div class="annotation">
+        <div class="annotation-text"><strong>Collusion signal:</strong> When <code>attendee_id = organizer_id</code>, money is moving in a circle — the organizer is buying their own tickets.</div>
+      </div>
+      <div class="annotation">
+        <div class="annotation-text"><strong>Chargeback window:</strong> <code>chargeback_eligible = FALSE</code> means the transaction is past the 14-day bank window — the funds are unrecoverable.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUERY 1 -->
+  <div class="tab-panel" id="tab-query1">
+    <div class="section-label">Step 1</div>
+    <h2>Identify the Nigerian IP Cluster</h2>
+    <p class="lead">Join fraud queue signals with payment transactions to surface all events with Nigerian IP origins above risk threshold, with their full dollar exposure split by recoverability.</p>
+
+    <div class="query-block">
+      <div class="query-header">
+        <span class="query-label">event_cluster_exposure.sql</span>
+        <button class="copy-btn" data-target="q1">Copy</button>
+      </div>
+      <div class="code-wrap">
+<pre id="q1"><span class="cmt">-- Step 1: Identify the Nigerian IP cluster in the fraud queue</span>
+<span class="kw">SELECT</span>
+    fq.event_id,
+    fq.organizer_id,
+    fq.risk_score,
+    fq.flag_date,
+    fq.flag_reason,
+    <span class="fn">COUNT</span>(pt.transaction_id)              <span class="kw">AS</span> total_transactions,
+    <span class="fn">SUM</span>(pt.amount_usd)                    <span class="kw">AS</span> total_exposure_usd,
+    <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> pt.chargeback_eligible = <span class="kw">FALSE</span>
+             <span class="kw">THEN</span> pt.amount_usd <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>) <span class="kw">AS</span> past_window_usd,
+    <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> pt.attendee_id)        <span class="kw">AS</span> unique_attendees,
+    <span class="cmt">-- Collusion signal: attendee buying their own tickets</span>
+    <span class="fn">COUNT</span>(<span class="kw">DISTINCT CASE</span>
+        <span class="kw">WHEN</span> pt.attendee_id = pt.organizer_id
+        <span class="kw">THEN</span> pt.attendee_id <span class="kw">END</span>)            <span class="kw">AS</span> self_purchase_count
+
+<span class="kw">FROM</span> fraud_queue fq
+<span class="kw">JOIN</span> payments_transactions pt
+    <span class="kw">ON</span> fq.event_id = pt.event_id
+
+<span class="kw">WHERE</span>
+    fq.ip_country = <span class="str">'Nigeria'</span>
+    <span class="kw">AND</span> fq.risk_score >= <span class="num">0.80</span>
+
+<span class="kw">GROUP BY</span>
+    fq.event_id,
+    fq.organizer_id,
+    fq.risk_score,
+    fq.flag_date,
+    fq.flag_reason
+
+<span class="kw">ORDER BY</span>
+    past_window_usd <span class="kw">DESC</span>;</pre>
+      </div>
+    </div>
+
+    <div class="annotation-list">
+      <div class="annotation">
+        <div class="annotation-text"><strong>WHERE filters:</strong> <code>ip_country = 'Nigeria'</code> scopes to the cluster; <code>risk_score >= 0.80</code> keeps only high-confidence flags — reduces noise from borderline cases.</div>
+      </div>
+      <div class="annotation">
+        <div class="annotation-text"><strong>CASE WHEN for recoverability:</strong> Splits total exposure into recoverable vs. past the chargeback window. This was the number that mattered — $800K past the window.</div>
+      </div>
+      <div class="annotation">
+        <div class="annotation-text"><strong>self_purchase_count:</strong> A DISTINCT CASE pattern — counts distinct attendee IDs only where they match the organizer ID. Flags the circular money movement without a subquery.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUERY 2 -->
+  <div class="tab-panel" id="tab-query2">
+    <div class="section-label">Step 2</div>
+    <h2>Organizer Network Rollup</h2>
+    <p class="lead">Roll up to organizer level to see connected account networks — one bad actor running multiple events shows up here as a single row with aggregated exposure.</p>
+
+    <div class="query-block">
+      <div class="query-header">
+        <span class="query-label">organizer_network_rollup.sql</span>
+        <button class="copy-btn" data-target="q2">Copy</button>
+      </div>
+      <div class="code-wrap">
+<pre id="q2"><span class="cmt">-- Step 2: Roll up to organizer level to surface connected account networks</span>
+<span class="kw">SELECT</span>
+    organizer_id,
+    <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> event_id)             <span class="kw">AS</span> events_flagged,
+    <span class="fn">SUM</span>(total_exposure_usd)               <span class="kw">AS</span> total_exposure_usd,
+    <span class="fn">SUM</span>(past_window_usd)                  <span class="kw">AS</span> unrecoverable_usd,
+    <span class="fn">AVG</span>(risk_score)                       <span class="kw">AS</span> avg_risk_score,
+    <span class="fn">MAX</span>(flag_date)                        <span class="kw">AS</span> most_recent_flag
+
+<span class="kw">FROM</span> (
+    <span class="cmt">-- Subquery reuses Step 1 logic</span>
+    <span class="kw">SELECT</span>
+        fq.event_id,
+        fq.organizer_id,
+        fq.risk_score,
+        fq.flag_date,
+        <span class="fn">SUM</span>(pt.amount_usd)                  <span class="kw">AS</span> total_exposure_usd,
+        <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> pt.chargeback_eligible = <span class="kw">FALSE</span>
+                 <span class="kw">THEN</span> pt.amount_usd <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>) <span class="kw">AS</span> past_window_usd
+    <span class="kw">FROM</span> fraud_queue fq
+    <span class="kw">JOIN</span> payments_transactions pt
+        <span class="kw">ON</span> fq.event_id = pt.event_id
+    <span class="kw">WHERE</span> fq.ip_country = <span class="str">'Nigeria'</span>
+      <span class="kw">AND</span> fq.risk_score >= <span class="num">0.80</span>
+    <span class="kw">GROUP BY</span> fq.event_id, fq.organizer_id, fq.risk_score, fq.flag_date
+) organizer_summary
+
+<span class="kw">GROUP BY</span> organizer_id
+<span class="kw">HAVING</span> <span class="fn">SUM</span>(past_window_usd) > <span class="num">0</span>
+<span class="kw">ORDER BY</span> unrecoverable_usd <span class="kw">DESC</span>;</pre>
+      </div>
+    </div>
+
+    <div class="annotation-list">
+      <div class="annotation">
+        <div class="annotation-text"><strong>Subquery pattern:</strong> Step 1's logic lives in a subquery — this avoids repeating the JOIN and WHERE, and keeps the outer query clean and readable.</div>
+      </div>
+      <div class="annotation">
+        <div class="annotation-text"><strong>HAVING clause:</strong> Filters to organizers with at least some unrecoverable exposure — removes organizers whose flagged transactions all fell within the chargeback window.</div>
+      </div>
+      <div class="annotation">
+        <div class="annotation-text"><strong>Network thinking:</strong> One organizer ID appearing across multiple event IDs is the signal for coordinated abuse — a single actor running a cluster of fraudulent events.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OUTCOME -->
+  <div class="tab-panel" id="tab-outcome">
+    <div class="section-label">Investigation Result</div>
+    <h2>What the Query Surfaced</h2>
+    <p class="lead">The join connected fraud signals with payment reality — revealing that the money had already moved past the point of recovery.</p>
+
+    <div class="outcome-grid">
+      <div class="outcome-card red">
+        <div class="outcome-num">$800K</div>
+        <div class="outcome-label">Unrecoverable — past 14-day chargeback window</div>
+      </div>
+      <div class="outcome-card amber">
+        <div class="outcome-num">0.80+</div>
+        <div class="outcome-label">Risk score threshold — high-confidence flags only</div>
+      </div>
+      <div class="outcome-card green">
+        <div class="outcome-num">Nigeria</div>
+        <div class="outcome-label">IP cluster origin — bot-created organizer accounts</div>
+      </div>
+    </div>
+
+    <div class="narrative">
+      <p>The spam queue had already flagged these events for suspicious activity — bot-created accounts, Nigerian IP origins. What the join to payments data revealed was the <strong>financial picture underneath those signals</strong>: coordinated ticket purchases moving money between organizer and attendee accounts, and $800K in transactions that had already cleared.</p>
+      <p>By the time the investigation connected the two datasets, the charges were past the two-week chargeback window. The money was gone. The events and accounts were taken down, the collusion pattern was documented, and the findings became the basis for a <strong>process change</strong>: getting fraud and payments signals in front of each other earlier, so the next cluster can be stopped before the window closes.</p>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  // Tab switching
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.tab;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + target).classList.add('active');
+    });
+  });
+
+  // Copy buttons
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const pre = document.getElementById(btn.dataset.target);
+      const text = pre.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+      }).catch(() => {
+        const range = document.createRange();
+        range.selectNode(pre);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+      });
+    });
+  });
+</script>
+
+</body>
+</html>
