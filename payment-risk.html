@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>DobeFlare: Payment Risk</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --bg2: #1a1a1a;
+    --bg3: #242424;
+    --bg4: #2e2e2e;
+    --border: #333;
+    --fg: #e8e8e8;
+    --fg2: #a0a0a0;
+    --fg3: #666;
+    --accent: #e8522a;
+    --accent2: #c43e1a;
+    --accent-dim: rgba(232,82,42,0.12);
+    --critical: #e8522a;
+    --high: #e8a52a;
+    --medium: #6ea8fe;
+    --low: #5a9e6f;
+    --critical-bg: rgba(232,82,42,0.1);
+    --high-bg: rgba(232,165,42,0.1);
+    --medium-bg: rgba(110,168,254,0.1);
+    --low-bg: rgba(90,158,111,0.1);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 0;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 14px max(24px, env(safe-area-inset-left, 0px));
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 100;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0 0 auto;
+    height: env(safe-area-inset-top, 0px);
+    background: var(--bg2);
+    z-index: 101;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700; color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .logo-text { font-size: 15px; font-weight: 600; }
+  .logo-module {
+    font-size: 12px;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    background: var(--accent-dim);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(232,82,42,0.3);
+  }
+  .header-sub {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--fg3);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── Layout ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 0;
+    min-height: calc(100vh - 61px);
+  }
+
+  /* ── Left panel ── */
+  .left {
+    padding: 24px;
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg3);
+    margin-bottom: 12px;
+  }
+
+  /* ── Signal cards ── */
+  .signal-group {
+    margin-bottom: 28px;
+  }
+  .signal-group-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg3);
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .signal-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    transition: border-color 0.15s, background 0.15s;
+    overflow: hidden;
+  }
+  .signal-card.active {
+    border-color: var(--accent);
+    background: var(--bg3);
+  }
+
+  .signal-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .signal-cb {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.15s, background 0.15s;
+    font-size: 11px;
+    color: transparent;
+  }
+  .signal-card.active .signal-cb {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #fff;
+  }
+  .signal-info { flex: 1; min-width: 0; }
+  .signal-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fg);
+  }
+  .signal-desc {
+    font-size: 11px;
+    color: var(--fg2);
+    margin-top: 2px;
+  }
+  .signal-weight {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg3);
+    flex-shrink: 0;
+  }
+  .signal-card.active .signal-weight {
+    color: var(--accent);
+  }
+
+  .signal-rationale {
+    display: none;
+    padding: 0 14px 12px 44px;
+    font-size: 12px;
+    color: var(--fg2);
+    line-height: 1.6;
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    margin-top: -1px;
+  }
+  .signal-card.open .signal-rationale { display: block; }
+
+  .rationale-toggle {
+    margin-left: auto;
+    font-size: 10px;
+    color: var(--fg3);
+    cursor: pointer;
+    padding: 2px 6px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    transition: color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+  }
+  .rationale-toggle:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ── Right panel ── */
+  .right {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: sticky;
+    top: 61px;
+    height: calc(100vh - 61px);
+    overflow-y: auto;
+  }
+
+  /* ── Score display ── */
+  .score-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+  }
+  .score-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg3);
+    margin-bottom: 10px;
+  }
+  .score-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 56px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--fg3);
+    transition: color 0.3s;
+  }
+  .score-number.critical { color: var(--critical); }
+  .score-number.high { color: var(--high); }
+  .score-number.medium { color: var(--medium); }
+  .score-number.low { color: var(--low); }
+
+  .score-bar-wrap {
+    margin: 14px 0 10px;
+    height: 6px;
+    background: var(--bg4);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .score-bar {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--fg3);
+    transition: width 0.4s cubic-bezier(.4,0,.2,1), background 0.3s;
+    width: 0%;
+  }
+  .score-bar.critical { background: var(--critical); }
+  .score-bar.high { background: var(--high); }
+  .score-bar.medium { background: var(--medium); }
+  .score-bar.low { background: var(--low); }
+
+  .tier-badge {
+    display: inline-block;
+    padding: 5px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--bg4);
+    color: var(--fg3);
+    transition: background 0.3s, color 0.3s;
+  }
+  .tier-badge.critical { background: var(--critical-bg); color: var(--critical); }
+  .tier-badge.high { background: var(--high-bg); color: var(--high); }
+  .tier-badge.medium { background: var(--medium-bg); color: var(--medium); }
+  .tier-badge.low { background: var(--low-bg); color: var(--low); }
+
+  /* ── Formula breakdown ── */
+  .formula-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .formula-title {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg3);
+    margin-bottom: 12px;
+  }
+  .formula-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .formula-name {
+    font-size: 11px;
+    color: var(--fg2);
+    width: 130px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .formula-bar-wrap {
+    flex: 1;
+    height: 4px;
+    background: var(--bg4);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .formula-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.4s cubic-bezier(.4,0,.2,1);
+    opacity: 0.3;
+  }
+  .formula-bar.active { opacity: 1; }
+  .formula-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--fg3);
+    width: 24px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .formula-val.active { color: var(--accent); }
+
+  /* ── Action box ── */
+  .action-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .action-title {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg3);
+    margin-bottom: 10px;
+  }
+  .action-content {
+    font-size: 12px;
+    color: var(--fg2);
+    line-height: 1.6;
+  }
+  .action-primary {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--fg3);
+    transition: color 0.3s;
+  }
+  .action-primary.critical { color: var(--critical); }
+  .action-primary.high { color: var(--high); }
+  .action-primary.medium { color: var(--medium); }
+  .action-primary.low { color: var(--low); }
+
+  /* ── Cluster box ── */
+  .cluster-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .cluster-desc {
+    font-size: 11px;
+    color: var(--fg3);
+    margin-bottom: 12px;
+  }
+  .cluster-row {
+    margin-bottom: 8px;
+  }
+  #cluster-slider {
+    width: 100%;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .cluster-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--fg3);
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 10px;
+  }
+  .cluster-current {
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .cluster-multiplier {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--fg3);
+    text-align: center;
+    padding: 6px;
+    background: var(--bg4);
+    border-radius: 4px;
+    transition: color 0.3s;
+  }
+  .cluster-multiplier.boosted { color: var(--accent); }
+
+  /* ── Reset ── */
+  .reset-btn {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--fg3);
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .reset-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Presets ── */
+  .presets {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+  .preset-btn {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: border-color 0.15s, background 0.15s;
+    text-align: left;
+    font-family: 'Inter', sans-serif;
+  }
+  .preset-btn:hover { border-color: var(--accent); background: var(--bg3); }
+  .preset-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .preset-btn-name { font-size: 12px; font-weight: 500; color: var(--fg); }
+  .preset-btn-sub { font-size: 11px; color: var(--fg3); margin-top: 1px; }
+  .preset-score {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 700px) {
+    .layout { grid-template-columns: 1fr; }
+    .right {
+      position: static;
+      height: auto;
+      border-top: 1px solid var(--border);
+    }
+    .header-sub { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">DF</div>
+    <span class="logo-text">DobeFlare</span>
+    <span class="logo-module">Payment Risk</span>
+  </div>
+  <a href="index.html" style="font-size:11px;color:var(--fg3);text-decoration:none;font-family:'JetBrains Mono',monospace;margin-left:auto;padding:3px 8px;border:1px solid var(--border);border-radius:3px;transition:color 0.15s,border-color 0.15s;" onmouseover="this.style.color='var(--accent)';this.style.borderColor='var(--accent)'" onmouseout="this.style.color='var(--fg3)';this.style.borderColor='var(--border)'">← DobeFlare</a>
+  <span class="header-sub" style="margin-left:0">v1.1 · Payment Fraud Signal Scorer</span>
+</header>
+
+<div class="layout">
+  <!-- Left: signals -->
+  <div class="left">
+
+    <div class="section-label">Load Scenario</div>
+    <div class="presets" id="presets">
+      <button class="preset-btn" onclick="loadPreset('bot')">
+        <span class="preset-dot" style="background:var(--critical)"></span>
+        <div>
+          <div class="preset-btn-name">Bot Account Farm</div>
+          <div class="preset-btn-sub">Headless browser + shared device + velocity spike</div>
+        </div>
+        <span class="preset-score critical">89</span>
+      </button>
+      <button class="preset-btn" onclick="loadPreset('carding')">
+        <span class="preset-dot" style="background:var(--critical)"></span>
+        <div>
+          <div class="preset-btn-name">Carding Ring</div>
+          <div class="preset-btn-sub">Shared payment instrument + KYC mismatch + chargebacks</div>
+        </div>
+        <span class="preset-score critical">73</span>
+      </button>
+      <button class="preset-btn" onclick="loadPreset('ato')">
+        <span class="preset-dot" style="background:var(--high)"></span>
+        <div>
+          <div class="preset-btn-name">Account Takeover</div>
+          <div class="preset-btn-sub">Shared IP + new device + KYC mismatch</div>
+        </div>
+        <span class="preset-score high">47</span>
+      </button>
+      <button class="preset-btn" onclick="loadPreset('joker')">  
+        <span class="preset-dot" style="background:var(--critical)"></span>
+        <div>
+          <div class="preset-btn-name">Joker Malware — P0</div>
+          <div class="preset-btn-sub">Silent subscription fraud + payment credential exfil</div>
+        </div>
+        <span class="preset-score critical">88</span>
+      </button>
+      <button class="preset-btn" onclick="loadPreset('low')">
+        <span class="preset-dot" style="background:var(--low)"></span>
+        <div>
+          <div class="preset-btn-name">Low Risk — Single Flag</div>
+          <div class="preset-btn-sub">New account only</div>
+        </div>
+        <span class="preset-score low">15</span>
+      </button>
+    </div>
+
+    <div class="section-label">Or Score Manually</div>
+
+    <!-- Identity signals -->
+    <div class="signal-group">
+      <div class="signal-group-title">Identity & Account Signals</div>
+
+      <div class="signal-card" id="card-new_account" onclick="handleCardClick(event, 'new_account')">
+        <div class="signal-top">
+          <div class="signal-cb" id="cb-new_account">✓</div>
+          <div class="signal-info">
+            <div class="signal-name">New Account (&lt;7 days old)</div>
+            <div class="signal-desc">Account created within the last week</div>
+          </div>
+          <span class="rationale-toggle" onclick="toggleRationale(event,'new_account')">why</span>
+          <div class="signal-weight" id="w-new_account">+15</div>
+        </div>
+        <div class="signal-rationale" id="r-new_account">
+          New accounts haven't established behavioral history. Combined with other signals, recency is a strong amplifier — most synthetic accounts are used immediately after creation before fraud systems build a profile on them.
+        </div>
+      </div>
+
+      <div class="signal-card" id="card-kyc_mismatch" onclick="handleCardClick(event, 'kyc_mismatch')">
+        <div class="signal-top">
+          <div class="signal-cb" id="cb-kyc_mismatch">✓</div>
+          <div class="signal-info">
+            <div class="signal-name">KYC Mismatch</div>
+            <div class="signal-desc">Name, email, or DOB variation across linked accounts</div>
+          </div>
+          <span class="rationale-toggle" onclick="toggleRationale(event,'kyc_mismatch')">why</span>
+          <div class="signal-weight" id="w-kyc_mismatch">+12</div>
+        </div>
+        <div class="signal-rationale" id="r-kyc_mismatch">
+          Fraudsters often use slight variations — typo emails (john@gmail vs john1@gmail), transposed names — to avoid exact-match deduplication. Fuzzy KYC matching across accounts sharing a device or IP is a strong cluster signal.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Device / network signals -->
+    <div class="signal-group">
+      <div class="signal-group-title">Device & Network Signals</div>
+
+      <div class="signal-card" id="card-headless" onclick="handleCardClick(event, 'headless')">
+        <div class="signal-top">
+          <div class="signal-cb" id="cb-headless">✓</div>
+          <div class="signal-info">
+            <div class="signal-name">Headless Browser / API Fingerprint</div>
+            <div class="signal-desc">Automated client detected — no real browser session</div>
+          </div>
+          <span class="rationale-toggle" onclick="toggleRationale(event,'headless')">why</span>
+          <div class="signal-weight" id="w-headless">+22</div>
+        </div>
+        <div class="signal-rationale" id="r-headless">
+          Headless browsers (Puppeteer, Selenium) and direct API calls lack standard browser attributes — no canvas fingerprint, missing navigator fields, no human interaction timing. This is a near-definitive bot signal when combined with account creation activity.
+        </div>
+      </div>
+
+      <div class="signal-card" id="card-shared_device" onclick="handleCardClick(event, 'shared_device')">
+        <div class="signal-top">
+          <div class="signal-cb" id="cb-shared_device">✓</div>
+          <div class="signal-info">
+            <div class="signal-name">Shared Device ID</div>
+            <div class="signal-desc">Same device fingerprint across 3+ accounts</div>
+          </div>
+          <span class="rationale-toggle" onclick="toggleRationale(event,'shared_device')">why</span>
+          <div class="signal-weight" id="w-shared_device">+20</div>
+        </div>
+        <div class="signal-rationale" id="r-shared_device">
+          Legitimate users occasionally share devices, but 3+ distinct accounts on one device is outside normal behavior. Device ID sharing is harder to spoof than IP, making it a higher-confidence signal for synthetic account farms.
+        </div>
+      </div>
+
+      <div class="signal-card" id="card-shared_ip" onclick="handleCardClick(event, 'shared_ip')">
+        <div class="signal-top">
+          <div class="signal-cb" id="cb-shared_ip">✓</div>
+          <div class="signal-info">
+            <div class="signal-name">Shared IP Across Accounts</div>
+            <div class="signal-desc">Same IP used by 3+ different account IDs</div>
+          </div>
+          <span class="rationale-toggle" onclick="toggleRationale(event,'shared_ip')">why</span>
+          <div class="signal-weight" id="w-shared_ip">+15</div>
+        </div>
+        <div class="signal-rationale" id="r-shared_ip">
+          Shared IPs alone are weak (NAT, VPNs, shared wifi) but become significant when combined with other signals. Residential proxy IPs rotating across accounts at high velocity are a stronger sub-signal than static datacenter IPs.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Payment signals -->
+    <div class="signal-group">
+      <div class="signal-group-title">Payment Signals</div>
+
+      <div class="signal-card" id="card-shared_payment" onclick="handleCardClick(event, 'shared_payment')">
+        <div class="signal-top">
+          <div class="signal-cb" id="cb-shared_payment">✓</div>
+          <div class="signal-info">
+            <div class="signal-name">Shared Payment Instrument</div>
+            <div class="signal-desc">Same card / account used across multiple account IDs</div>
+          </div>
+          <span class="rationale-toggle" onclick="toggleRationale(event,'shared_payment')">why</span>
+          <div class="signal-weight" id="w-shared_payment">+25</div>
+        </div>
+        <div class="signal-rationale" id="r-shared_payment">
+          One payment instrument across multiple accounts is the clearest sign of coordinated fraud. In legitimate use, card sharing happens within families but rarely across unrelated accounts. This is the primary signal for carding rings and payment fraud clusters.
+        </div>
+      </div>
+
+      <div class="signal-card" id="card-velocity" onclick="handleCardClick(event, 'velocity')">
+        <div class="signal-top">
+          <div class="signal-cb" id="cb-velocity">✓</div>
+          <div class="signal-info">
+            <div class="signal-name">Velocity Spike</div>
+            <div class="signal-desc">3+ transactions from same account in under 10 minutes</div>
+          </div>
+          <span class="rationale-toggle" onclick="toggleRationale(event,'velocity')">why</span>
+          <div class="signal-weight" id="w-velocity">+18</div>
+        </div>
+        <div class="signal-rationale" id="r-shared_payment">
+          Fraudsters move fast — they know stolen credentials or cards have a short window before fraud detection kicks in. Rapid-fire transactions in a compressed window (especially across different merchants or amounts) is a strong behavioral signal distinct from normal purchase velocity.
+        </div>
+      </div>
+
+      <div class="signal-card" id="card-chargeback" onclick="handleCardClick(event, 'chargeback')">
+        <div class="signal-top">
+          <div class="signal-cb" id="cb-chargeback">✓</div>
+          <div class="signal-info">
+            <div class="signal-name">Chargeback History on Linked Accounts</div>
+            <div class="signal-desc">Prior chargebacks on accounts sharing device / IP / card</div>
+          </div>
+          <span class="rationale-toggle" onclick="toggleRationale(event,'chargeback')">why</span>
+          <div class="signal-weight" id="w-chargeback">+18</div>
+        </div>
+        <div class="signal-rationale" id="r-chargeback">
+          Historical chargebacks on a cluster of accounts are a lagging but high-confidence signal. If linked accounts have already generated chargebacks, new accounts in the same cluster are almost certainly part of the same operation. This anchors the current activity to a known bad pattern.
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Right: score panel -->
+  <div class="right">
+    <div class="score-box">
+      <div class="score-label">Risk Score</div>
+      <div class="score-number" id="score-num">0</div>
+      <div class="score-bar-wrap">
+        <div class="score-bar" id="score-bar"></div>
+      </div>
+      <div class="tier-badge" id="tier-badge">No signals selected</div>
+    </div>
+
+    <div class="formula-box">
+      <div class="formula-title">Score Breakdown</div>
+      <div id="formula-rows"></div>
+    </div>
+
+    <div class="action-box">
+      <div class="action-title">Recommended Action</div>
+      <div class="action-primary" id="action-primary">—</div>
+      <div class="action-content" id="action-detail">Select signals to generate a risk assessment and recommended action.</div>
+    </div>
+
+    <div class="cluster-box">
+      <div class="formula-title">Cluster Size Multiplier</div>
+      <div class="cluster-desc">Number of accounts sharing the same signal</div>
+      <div class="cluster-row">
+        <input type="range" id="cluster-slider" min="1" max="200" value="1" oninput="updateCluster(this.value)">
+      </div>
+      <div class="cluster-labels">
+        <span>1</span>
+        <span id="cluster-val" class="cluster-current">1 account</span>
+        <span>200+</span>
+      </div>
+      <div class="cluster-multiplier" id="cluster-mult-display">×1.0 — no boost</div>
+    </div>
+    <button class="reset-btn" onclick="resetAll()">↺ Clear all signals</button>
+  </div>
+</div>
+
+<script>
+const SIGNALS = {
+  new_account:    { name: 'New Account',              weight: 15 },
+  kyc_mismatch:   { name: 'KYC Mismatch',             weight: 12 },
+  headless:       { name: 'Headless / API',            weight: 22 },
+  shared_device:  { name: 'Shared Device',             weight: 20 },
+  shared_ip:      { name: 'Shared IP',                 weight: 15 },
+  shared_payment: { name: 'Shared Payment Instrument', weight: 25 },
+  velocity:       { name: 'Velocity Spike',            weight: 18 },
+  chargeback:     { name: 'Chargeback History',        weight: 18 },
+};
+
+const PRESETS = {
+  joker:   ['headless','velocity','shared_payment','chargeback'],
+  bot:     ['headless','shared_device','velocity','new_account'],
+  carding: ['shared_payment','kyc_mismatch','chargeback','new_account'],
+  ato:     ['shared_ip','new_account','kyc_mismatch'],
+  low:     ['new_account'],
+};
+
+const ACTIONS = {
+  critical: {
+    primary: 'Auto-Block + Escalate to Fraud Team',
+    detail: 'Immediately suspend all accounts in the cluster. Freeze associated payment instruments. Create P0 fraud ticket with full cluster mapping. Notify payment processor. Do not wait for manual review — the velocity of this pattern means delay increases exposure.',
+  },
+  high: {
+    primary: 'Manual Review Queue — Priority',
+    detail: 'Flag all accounts in the cluster for expedited manual review within 4 hours. Place temporary hold on new transactions. Pull KYC documents if available. Cross-reference with existing fraud cases for pattern matching.',
+  },
+  medium: {
+    primary: 'Monitor + Soft Flag',
+    detail: 'Add accounts to enhanced monitoring list. Apply friction on next transaction (step-up auth, CAPTCHA). Do not block yet — insufficient confidence for action. Set a 24-hour review checkpoint.',
+  },
+  low: {
+    primary: 'Log and Observe',
+    detail: 'Record the signal for baseline tracking. No immediate action required. If additional signals emerge within 7 days, re-evaluate. This may represent a first-time user with no fraud history.',
+  },
+  none: {
+    primary: '—',
+    detail: 'Select signals to generate a risk assessment and recommended action.',
+  }
+};
+
+let active = new Set();
+let clusterSize = 1;
+
+function getClusterMultiplier(n) {
+  if (n >= 50)  return 1.5;
+  if (n >= 20)  return 1.3;
+  if (n >= 10)  return 1.15;
+  if (n >= 5)   return 1.05;
+  return 1.0;
+}
+
+function updateCluster(val) {
+  clusterSize = parseInt(val);
+  const mult = getClusterMultiplier(clusterSize);
+  const el = document.getElementById('cluster-val');
+  el.textContent = clusterSize === 1 ? '1 account' : clusterSize + ' accounts';
+  const md = document.getElementById('cluster-mult-display');
+  if (mult > 1) {
+    md.textContent = '×' + mult.toFixed(2) + ' — cluster boost applied';
+    md.classList.add('boosted');
+  } else {
+    md.textContent = '×1.0 — no boost';
+    md.classList.remove('boosted');
+  }
+  updateScore();
+}
+
+function getTier(score) {
+  if (score >= 70) return 'critical';
+  if (score >= 45) return 'high';
+  if (score >= 25) return 'medium';
+  if (score > 0)  return 'low';
+  return 'none';
+}
+
+function getTierLabel(tier) {
+  return { critical:'Critical Risk', high:'High Risk', medium:'Medium Risk', low:'Low Risk', none:'No signals selected' }[tier];
+}
+
+function handleCardClick(e, id) {
+  if (e.target.classList.contains('rationale-toggle')) return;
+  toggle(id);
+}
+
+function toggle(id) {
+  const card = document.getElementById('card-' + id);
+  if (active.has(id)) {
+    active.delete(id);
+    card.classList.remove('active');
+  } else {
+    active.add(id);
+    card.classList.add('active');
+  }
+  updateScore();
+}
+
+function toggleRationale(e, id) {
+  e.stopPropagation();
+  const card = document.getElementById('card-' + id);
+  card.classList.toggle('open');
+}
+
+function updateScore() {
+  let baseScore = 0;
+  active.forEach(id => { baseScore += SIGNALS[id].weight; });
+  const mult = getClusterMultiplier(clusterSize);
+  let score = Math.min(Math.round(baseScore * mult), 100);
+
+  const tier = getTier(score);
+
+  // Score number
+  const numEl = document.getElementById('score-num');
+  numEl.textContent = score + (mult > 1 ? '' : '');
+  numEl.className = 'score-number' + (tier !== 'none' ? ' ' + tier : '');
+
+  // Bar
+  const bar = document.getElementById('score-bar');
+  bar.style.width = score + '%';
+  bar.className = 'score-bar' + (tier !== 'none' ? ' ' + tier : '');
+
+  // Badge
+  const badge = document.getElementById('tier-badge');
+  badge.textContent = getTierLabel(tier);
+  badge.className = 'tier-badge' + (tier !== 'none' ? ' ' + tier : '');
+
+  // Formula rows
+  const container = document.getElementById('formula-rows');
+  container.innerHTML = '';
+  const maxW = 25;
+  Object.entries(SIGNALS).forEach(([id, sig]) => {
+    const isActive = active.has(id);
+    const pct = isActive ? Math.round((sig.weight / maxW) * 100) : 0;
+    const row = document.createElement('div');
+    row.className = 'formula-row';
+    row.innerHTML = `
+      <span class="formula-name">${sig.name}</span>
+      <div class="formula-bar-wrap">
+        <div class="formula-bar${isActive ? ' active' : ''}" style="width:${pct}%"></div>
+      </div>
+      <span class="formula-val${isActive ? ' active' : ''}">${isActive ? '+'+sig.weight : '—'}</span>
+    `;
+    container.appendChild(row);
+  });
+
+  // Action
+  const action = ACTIONS[tier];
+  const primaryEl = document.getElementById('action-primary');
+  primaryEl.textContent = action.primary;
+  primaryEl.className = 'action-primary' + (tier !== 'none' ? ' ' + tier : '');
+  document.getElementById('action-detail').textContent = action.detail;
+}
+
+function loadPreset(key) {
+  resetAll(false);
+  PRESETS[key].forEach(id => {
+    active.add(id);
+    document.getElementById('card-' + id).classList.add('active');
+  });
+  updateScore();
+}
+
+function resetAll(update = true) {
+  active.forEach(id => {
+    document.getElementById('card-' + id).classList.remove('active', 'open');
+  });
+  active.clear();
+  if (update) updateScore();
+}
+
+// Init
+updateScore();
+</script>
+</body>
+</html>
