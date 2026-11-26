@@ -1,0 +1,1655 @@
+<title>PinFlare</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #181c26;
+    --surface-2: #1f2435;
+    --border: #2a2f42;
+    --fg: #e8eaf0;
+    --fg-muted: #8890a6;
+    --accent: #e8522a;
+    --accent-dim: rgba(232,82,42,0.12);
+    --accent-glow: rgba(232,82,42,0.25);
+    --green: #22c55e;
+    --green-dim: rgba(34,197,94,0.12);
+    --red: #ff3b3b;
+    --red-dim: rgba(255,59,59,0.12);
+    --yellow: #f59e0b;
+    --yellow-dim: rgba(245,158,11,0.12);
+    --blue: #3b82f6;
+    --blue-dim: rgba(59,130,246,0.12);
+    --font-ui: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #f0f2f7;
+      --surface: #ffffff;
+      --surface-2: #f5f7fb;
+      --border: #dde1ed;
+      --fg: #131620;
+      --fg-muted: #5c647a;
+      --accent: #d44420;
+      --accent-dim: rgba(212,68,32,0.08);
+      --accent-glow: rgba(212,68,32,0.18);
+      --green: #16a34a;
+      --green-dim: rgba(22,163,74,0.08);
+      --red: #dc2626;
+      --red-dim: rgba(220,38,38,0.08);
+      --yellow: #d97706;
+      --yellow-dim: rgba(217,119,6,0.08);
+      --blue: #2563eb;
+      --blue-dim: rgba(37,99,235,0.08);
+      color-scheme: light;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #f0f2f7; --surface: #ffffff; --surface-2: #f5f7fb;
+    --border: #dde1ed; --fg: #131620; --fg-muted: #5c647a;
+    --accent: #d44420; --accent-dim: rgba(212,68,32,0.08);
+    --accent-glow: rgba(212,68,32,0.18);
+    --green: #16a34a; --green-dim: rgba(22,163,74,0.08);
+    --red: #dc2626; --red-dim: rgba(220,38,38,0.08);
+    --yellow: #d97706; --yellow-dim: rgba(217,119,6,0.08);
+    --blue: #2563eb; --blue-dim: rgba(37,99,235,0.08);
+    color-scheme: light;
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1117; --surface: #181c26; --surface-2: #1f2435;
+    --border: #2a2f42; --fg: #e8eaf0; --fg-muted: #8890a6;
+    --accent: #e8522a; --accent-dim: rgba(232,82,42,0.12);
+    --accent-glow: rgba(232,82,42,0.25);
+    --green: #22c55e; --green-dim: rgba(34,197,94,0.12);
+    --red: #ff3b3b; --red-dim: rgba(255,59,59,0.12);
+    --yellow: #f59e0b; --yellow-dim: rgba(245,158,11,0.12);
+    --blue: #3b82f6; --blue-dim: rgba(59,130,246,0.12);
+    color-scheme: dark;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 0;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 max(24px, env(safe-area-inset-left, 0px));
+    padding-right: max(24px, env(safe-area-inset-right, 0px));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 52px;
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 100;
+  }
+  .header-left { display: flex; align-items: center; gap: 10px; }
+  .logo {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+  }
+  .logo-sub { font-size: 11px; color: var(--fg-muted); font-weight: 500; letter-spacing: 0.04em; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .module-link {
+    font-size: 11px; font-weight: 600; color: var(--accent);
+    text-decoration: none; letter-spacing: 0.06em; text-transform: uppercase;
+    background: var(--accent-dim); border: 1px solid rgba(232,82,42,0.3);
+    padding: 4px 10px; border-radius: 4px; font-family: var(--font-mono);
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .module-link:hover { background: rgba(232,82,42,0.2); border-color: var(--accent); }
+  .context-badge {
+    font-size: 11px; font-weight: 500; color: var(--fg-muted);
+    background: var(--surface-2); border: 1px solid var(--border);
+    padding: 3px 10px; border-radius: 4px; font-family: var(--font-mono);
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Main layout ── */
+  .main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 28px 0 48px;
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  @media (max-width: 800px) {
+    .main { grid-template-columns: 1fr; }
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-title {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--fg-muted); font-family: var(--font-mono);
+  }
+  .card-body { padding: 18px; }
+
+  /* ── Controls ── */
+  label { display: block; font-size: 12px; font-weight: 600; color: var(--fg-muted); margin-bottom: 6px; letter-spacing: 0.04em; text-transform: uppercase; }
+  select, input[type="range"] { width: 100%; }
+  select {
+    background: var(--surface-2); border: 1px solid var(--border);
+    color: var(--fg); font-family: var(--font-ui); font-size: 13px;
+    padding: 8px 10px; border-radius: 6px; appearance: none;
+    cursor: pointer;
+  }
+  select:focus { outline: none; border-color: var(--accent); }
+
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+
+  /* ── Threshold slider ── */
+  .threshold-row { display: flex; align-items: center; gap: 10px; }
+  .threshold-val {
+    font-family: var(--font-mono); font-size: 13px; font-weight: 600;
+    color: var(--accent); min-width: 36px; text-align: right;
+  }
+  input[type="range"] {
+    -webkit-appearance: none; height: 4px; background: var(--border);
+    border-radius: 2px; cursor: pointer; flex: 1;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 14px; height: 14px;
+    background: var(--accent); border-radius: 50%; cursor: pointer;
+  }
+
+  /* ── Metric tiles ── */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 600px) { .metrics-grid { grid-template-columns: repeat(2, 1fr); } }
+  .metric-tile {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 12px;
+    text-align: center;
+  }
+  .metric-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-muted); margin-bottom: 6px; }
+  .metric-value { font-family: var(--font-mono); font-size: 24px; font-weight: 700; line-height: 1; }
+  .metric-value.green { color: var(--green); }
+  .metric-value.red { color: var(--red); }
+  .metric-value.yellow { color: var(--yellow); }
+  .metric-value.blue { color: var(--blue); }
+  .metric-sub { font-size: 10px; color: var(--fg-muted); margin-top: 4px; }
+
+  /* ── PR Curve canvas ── */
+  .curve-wrap { position: relative; margin-bottom: 16px; }
+  canvas { display: block; width: 100%; height: auto; border-radius: 6px; }
+
+  /* ── Error breakdown table ── */
+  .breakdown-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .error-box {
+    border-radius: 8px;
+    padding: 14px;
+    border: 1px solid;
+  }
+  .error-box.fp { background: var(--red-dim); border-color: rgba(255,59,59,0.25); }
+  .error-box.fn { background: var(--yellow-dim); border-color: rgba(245,158,11,0.25); }
+  .error-box.tp { background: var(--green-dim); border-color: rgba(34,197,94,0.25); }
+  .error-box.tn { background: var(--blue-dim); border-color: rgba(59,130,246,0.25); }
+  .error-type { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+  .error-box.fp .error-type { color: var(--red); }
+  .error-box.fn .error-type { color: var(--yellow); }
+  .error-box.tp .error-type { color: var(--green); }
+  .error-box.tn .error-type { color: var(--blue); }
+  .error-count { font-family: var(--font-mono); font-size: 22px; font-weight: 700; line-height: 1; }
+  .error-desc { font-size: 11px; color: var(--fg-muted); margin-top: 4px; line-height: 1.4; }
+
+  /* ── Decision table ── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 480px; }
+  th {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--fg-muted); padding: 8px 12px; text-align: left;
+    border-bottom: 1px solid var(--border); font-family: var(--font-mono);
+  }
+  td { padding: 9px 12px; font-size: 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface-2); }
+  .badge {
+    display: inline-block; font-size: 10px; font-weight: 600;
+    padding: 2px 7px; border-radius: 3px; font-family: var(--font-mono);
+    letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .badge.violating { background: var(--red-dim); color: var(--red); }
+  .badge.safe { background: var(--green-dim); color: var(--green); }
+  .badge.tp { background: var(--green-dim); color: var(--green); }
+  .badge.tn { background: var(--blue-dim); color: var(--blue); }
+  .badge.fp { background: var(--red-dim); color: var(--red); }
+  .badge.fn { background: var(--yellow-dim); color: var(--yellow); }
+  .conf-bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .conf-bar-bg { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .conf-bar-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+  .conf-val { font-family: var(--font-mono); font-size: 11px; color: var(--fg-muted); min-width: 30px; text-align: right; }
+
+  /* ── Insight box ── */
+  .insight {
+    background: var(--accent-dim);
+    border: 1px solid rgba(232,82,42,0.25);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 12px;
+    color: var(--fg-muted);
+    line-height: 1.6;
+  }
+  .insight strong { color: var(--accent); }
+
+  /* ── Scenario pill ── */
+  .scenario-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .pill {
+    font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 20px;
+    cursor: pointer; border: 1px solid var(--border); background: var(--surface-2);
+    color: var(--fg-muted); font-family: var(--font-mono); transition: all 0.15s;
+    letter-spacing: 0.04em;
+  }
+  .pill.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+  .pill:hover:not(.active) { border-color: var(--fg-muted); color: var(--fg); }
+
+  .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+  .run-btn {
+    width: 100%; padding: 10px; background: var(--accent); border: none;
+    color: white; font-family: var(--font-mono); font-size: 13px; font-weight: 600;
+    border-radius: 6px; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase;
+    transition: opacity 0.15s;
+  }
+  .run-btn:hover { opacity: 0.85; }
+
+  .section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--fg-muted); margin-bottom: 10px; font-family: var(--font-mono);
+  }
+
+  /* ── Tabs ── */
+  .tab-btn {
+    background: none; border: none; cursor: pointer;
+    font-family: var(--font-mono); font-size: 12px; font-weight: 600;
+    color: var(--fg-muted); padding: 14px 18px;
+    border-bottom: 2px solid transparent; letter-spacing: 0.06em;
+    text-transform: uppercase; transition: color 0.15s, border-color 0.15s;
+  }
+  .tab-btn:hover { color: var(--fg); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  /* ── Sampling tab ── */
+  .sampling-wrap {
+    max-width: 1200px; margin: 0 auto; padding: 28px 0 48px;
+    display: grid; grid-template-columns: 300px 1fr; gap: 20px; align-items: start;
+  }
+  @media (max-width: 800px) { .sampling-wrap { grid-template-columns: 1fr; } }
+
+  .method-card {
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px; cursor: pointer; transition: border-color 0.15s, background 0.15s;
+    margin-bottom: 8px;
+  }
+  .method-card:hover { border-color: var(--fg-muted); }
+  .method-card.active { border-color: var(--accent); background: var(--accent-dim); }
+  .method-card:last-child { margin-bottom: 0; }
+  .method-name { font-size: 13px; font-weight: 700; color: var(--fg); margin-bottom: 4px; font-family: var(--font-mono); }
+  .method-card.active .method-name { color: var(--accent); }
+  .method-desc { font-size: 11px; color: var(--fg-muted); line-height: 1.5; }
+
+  .stacked-bar { height: 24px; border-radius: 4px; overflow: hidden; display: flex; margin-bottom: 6px; }
+  .bar-seg { height: 100%; transition: width 0.4s; }
+  .bar-legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+  .bar-legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--fg-muted); }
+  .bar-legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+  .queue-row { display: grid; grid-template-columns: 130px 1fr 60px; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .queue-name { font-size: 12px; font-weight: 600; color: var(--fg); }
+  .queue-bar-bg { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .queue-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s; }
+  .queue-pct { font-family: var(--font-mono); font-size: 11px; color: var(--fg-muted); text-align: right; }
+
+  .tradeoff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .tradeoff-box { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+  .tradeoff-label { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-muted); margin-bottom: 6px; font-family: var(--font-mono); }
+  .tradeoff-val { font-size: 13px; color: var(--fg); line-height: 1.4; }
+</style>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <span class="logo">PinFlare</span>
+    <span class="logo-sub">Quality Evaluation Engine</span>
+  </div>
+  <div class="header-right">
+    <span class="context-badge">Content Moderation · Precision/Recall</span>
+    <a class="module-link" href="index.html">← DobeFlare</a>
+  </div>
+</div>
+
+<!-- Tab nav -->
+<div style="background:var(--surface);border-bottom:1px solid var(--border);padding:0 max(24px,env(safe-area-inset-left,0px));">
+  <div style="max-width:1200px;margin:0 auto;display:flex;gap:0;">
+    <button class="tab-btn active" data-tab="eval">Evaluation</button>
+    <button class="tab-btn" data-tab="sampling">Sampling Strategy</button>
+    <button class="tab-btn" data-tab="matrix">Full Matrix</button>
+  </div>
+</div>
+
+<div class="tab-pane active" id="tab-eval">
+<!-- Comparison panels -->
+<div style="max-width:1200px;margin:0 auto 0;padding:28px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+
+  <!-- All batches · current scenario -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">All Batches · Current Queue</span>
+      <span style="font-size:11px;color:var(--fg-muted);font-family:var(--font-mono);" id="compScenarioLabel">—</span>
+    </div>
+    <div class="card-body">
+      <div class="table-wrap">
+        <table id="compTable">
+          <thead>
+            <tr>
+              <th>Batch</th>
+              <th>Profile</th>
+              <th>Precision</th>
+              <th>Recall</th>
+              <th>F1</th>
+              <th>FP</th>
+              <th>FN</th>
+            </tr>
+          </thead>
+          <tbody id="compBody"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:12px;font-size:11px;color:var(--fg-muted);line-height:1.6;" id="compInsight"></div>
+    </div>
+  </div>
+
+  <!-- Current batch · all queues -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Current Batch · All Queues</span>
+      <span style="font-size:11px;color:var(--fg-muted);font-family:var(--font-mono);" id="queueCompLabel">—</span>
+    </div>
+    <div class="card-body">
+      <div class="table-wrap">
+        <table id="queueCompTable">
+          <thead>
+            <tr>
+              <th>Queue</th>
+              <th>Precision</th>
+              <th>Recall</th>
+              <th>F1</th>
+              <th>FP</th>
+              <th>FN</th>
+              <th>Risk</th>
+            </tr>
+          </thead>
+          <tbody id="queueCompBody"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:12px;font-size:11px;color:var(--fg-muted);line-height:1.6;" id="queueCompInsight"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- Left: Controls -->
+  <div style="display:flex;flex-direction:column;gap:16px;">
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Scenario</span></div>
+      <div class="card-body">
+        <div class="section-label">Select Review Queue</div>
+        <div class="scenario-pills">
+          <span class="pill active" data-scenario="hate">Hate Speech</span>
+          <span class="pill" data-scenario="spam">Spam / Scam</span>
+          <span class="pill" data-scenario="graphic">Graphic Violence</span>
+          <span class="pill" data-scenario="csam">Minor Safety</span>
+        </div>
+        <div class="field">
+          <label>Reviewer Batch</label>
+          <select id="reviewerSelect">
+            <option value="A">Reviewer Batch A — New hire cohort</option>
+            <option value="B">Reviewer Batch B — 6-month vendor team</option>
+            <option value="C">Reviewer Batch C — Senior specialists</option>
+            <option value="D">Reviewer Batch D — AI Agent</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Confidence Threshold</label>
+          <div class="threshold-row">
+            <input type="range" id="threshSlider" min="0.3" max="0.95" step="0.05" value="0.5">
+            <span class="threshold-val" id="threshVal">0.50</span>
+          </div>
+          <div style="font-size:11px;color:var(--fg-muted);margin-top:6px;">
+            Decisions below threshold → escalated for expert review
+          </div>
+        </div>
+        <button class="run-btn" id="runBtn">Run Evaluation →</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Golden Dataset</span></div>
+      <div class="card-body">
+        <div style="font-size:12px;color:var(--fg-muted);line-height:1.6;margin-bottom:12px;">
+          Ground-truth labels established by senior policy specialists. Used as the calibration benchmark for all reviewer batches.
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:10px;text-align:center;">
+            <div style="font-family:var(--font-mono);font-size:20px;font-weight:700;" id="goldenTotal">50</div>
+            <div style="font-size:10px;color:var(--fg-muted);margin-top:2px;">Total Items</div>
+          </div>
+          <div style="background:var(--red-dim);border:1px solid rgba(255,59,59,0.2);border-radius:6px;padding:10px;text-align:center;">
+            <div style="font-family:var(--font-mono);font-size:20px;font-weight:700;color:var(--red);" id="goldenViolating">—</div>
+            <div style="font-size:10px;color:var(--fg-muted);margin-top:2px;">Violating</div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size:11px;color:var(--fg-muted);">
+          Prevalence rate: <span style="font-family:var(--font-mono);color:var(--fg);" id="prevalenceRate">—</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Right: Results -->
+  <div style="display:flex;flex-direction:column;gap:16px;">
+
+    <!-- Metrics -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Evaluation Metrics</span>
+        <span style="font-size:11px;color:var(--fg-muted);font-family:var(--font-mono);" id="batchLabel">—</span>
+      </div>
+      <div class="card-body">
+        <div class="metrics-grid">
+          <div class="metric-tile">
+            <div class="metric-label">Precision</div>
+            <div class="metric-value green" id="metricPrecision">—</div>
+            <div class="metric-sub">Of flagged, % correct</div>
+          </div>
+          <div class="metric-tile">
+            <div class="metric-label">Recall</div>
+            <div class="metric-value yellow" id="metricRecall">—</div>
+            <div class="metric-sub">Of violations, % caught</div>
+          </div>
+          <div class="metric-tile">
+            <div class="metric-label">F1 Score</div>
+            <div class="metric-value blue" id="metricF1">—</div>
+            <div class="metric-sub">Harmonic mean</div>
+          </div>
+          <div class="metric-tile">
+            <div class="metric-label">Accuracy</div>
+            <div class="metric-value" id="metricAcc" style="color:var(--fg);">—</div>
+            <div class="metric-sub">Overall correct</div>
+          </div>
+        </div>
+
+        <div id="insightBox" class="insight" style="display:none;"></div>
+      </div>
+    </div>
+
+    <!-- P/R Curve -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Precision–Recall Curve</span>
+        <span style="font-size:11px;color:var(--fg-muted);">Threshold: <span id="curveThr" style="font-family:var(--font-mono);color:var(--accent);">0.50</span></span>
+      </div>
+      <div class="card-body">
+        <div class="curve-wrap">
+          <canvas id="prCanvas" width="600" height="260"></canvas>
+        </div>
+        <div style="font-size:11px;color:var(--fg-muted);line-height:1.6;">
+          Moving the threshold left catches more violations (↑ recall) at the cost of more false positives (↓ precision). The orange dot marks your current threshold.
+        </div>
+      </div>
+    </div>
+
+    <!-- Error breakdown -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">Error Breakdown</span></div>
+      <div class="card-body">
+        <div class="breakdown-grid">
+          <div class="error-box fp">
+            <div class="error-type">False Positives</div>
+            <div class="error-count" style="color:var(--red);" id="countFP">—</div>
+            <div class="error-desc">Safe content flagged as violating — over-removal risk</div>
+          </div>
+          <div class="error-box fn">
+            <div class="error-type">False Negatives</div>
+            <div class="error-count" style="color:var(--yellow);" id="countFN">—</div>
+            <div class="error-desc">Violations missed — harm reaches the platform</div>
+          </div>
+          <div class="error-box tp">
+            <div class="error-type">True Positives</div>
+            <div class="error-count" style="color:var(--green);" id="countTP">—</div>
+            <div class="error-desc">Violations correctly caught</div>
+          </div>
+          <div class="error-box tn">
+            <div class="error-type">True Negatives</div>
+            <div class="error-count" style="color:var(--blue);" id="countTN">—</div>
+            <div class="error-desc">Safe content correctly passed</div>
+          </div>
+        </div>
+
+        <!-- Decision table -->
+        <div class="section-label">Sample Decisions</div>
+        <div class="table-wrap">
+          <table id="decisionTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Content Signal</th>
+                <th>Golden Label</th>
+                <th>Reviewer Call</th>
+                <th>Confidence</th>
+                <th>Outcome</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div><!-- /tab-eval -->
+
+<!-- Sampling Strategy Tab -->
+<div class="tab-pane" id="tab-sampling">
+<div class="sampling-wrap">
+
+  <!-- Left: method selector -->
+  <div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Sampling Method</span></div>
+      <div class="card-body" style="padding:12px;">
+        <div class="method-card active" data-method="random">
+          <div class="method-name">Random Sampling</div>
+          <div class="method-desc">Select items uniformly at random from the review queue. No bias toward any content type.</div>
+        </div>
+        <div class="method-card" data-method="stratified">
+          <div class="method-name">Stratified Sampling</div>
+          <div class="method-desc">Sample proportionally from each content category. Ensures every violation type is represented.</div>
+        </div>
+        <div class="method-card" data-method="risk">
+          <div class="method-name">Risk-Weighted Sampling</div>
+          <div class="method-desc">Oversample high-risk and low-prevalence content. Prioritizes queues where misses cause the most harm.</div>
+        </div>
+        <div class="method-card" data-method="adversarial">
+          <div class="method-name">Adversarial Sampling</div>
+          <div class="method-desc">Deliberately include policy boundary cases and known reviewer blind spots. Stress-tests calibration.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: results -->
+  <div style="display:flex;flex-direction:column;gap:16px;">
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Sample Composition</span>
+        <span style="font-size:11px;color:var(--fg-muted);font-family:var(--font-mono);" id="sampleMethodLabel">—</span>
+      </div>
+      <div class="card-body">
+        <div class="section-label">Queue Allocation (n=100 items)</div>
+        <div id="queueBars"></div>
+        <div class="divider"></div>
+        <div class="section-label">Composition Breakdown</div>
+        <div class="stacked-bar" id="compositionBar"></div>
+        <div class="bar-legend" id="compositionLegend"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Method Tradeoffs</span></div>
+      <div class="card-body">
+        <div class="tradeoff-grid">
+          <div class="tradeoff-box">
+            <div class="tradeoff-label">Coverage</div>
+            <div class="tradeoff-val" id="tradeoffCoverage">—</div>
+          </div>
+          <div class="tradeoff-box">
+            <div class="tradeoff-label">Bias Risk</div>
+            <div class="tradeoff-val" id="tradeoffBias">—</div>
+          </div>
+          <div class="tradeoff-box">
+            <div class="tradeoff-label">Rare Event Detection</div>
+            <div class="tradeoff-val" id="tradeoffRare">—</div>
+          </div>
+          <div class="tradeoff-box">
+            <div class="tradeoff-label">Best For</div>
+            <div class="tradeoff-val" id="tradeoffBestFor">—</div>
+          </div>
+        </div>
+        <div class="insight" id="samplingInsight"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Pinterest Application</span></div>
+      <div class="card-body">
+        <div style="font-size:13px;color:var(--fg);line-height:1.7;" id="pinterestApplication">—</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div><!-- /tab-sampling -->
+
+<!-- Full Matrix Tab -->
+<div class="tab-pane" id="tab-matrix">
+<div style="max-width:1200px;margin:0 auto;padding:28px 0 48px;">
+
+  <div style="margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <div>
+      <div style="font-size:18px;font-weight:700;color:var(--fg);margin-bottom:4px;">Batch × Queue × Sampling Full Comparison</div>
+      <div style="font-size:12px;color:var(--fg-muted);">Every reviewer batch, queue, and sampling strategy — see how sample composition shifts precision, recall, and error counts</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span style="font-size:11px;color:var(--fg-muted);">Threshold:</span>
+      <span id="matrixThrLabel" style="font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--accent);">0.50</span>
+      <span style="font-size:11px;color:var(--fg-muted);margin-left:12px;">Metric:</span>
+      <select id="matrixMetricSelect" style="width:auto;padding:5px 10px;font-size:12px;">
+        <option value="f1">F1 Score</option>
+        <option value="precision">Precision</option>
+        <option value="recall">Recall</option>
+        <option value="fn">False Negatives</option>
+        <option value="fp">False Positives</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Sampling strategy selector for matrix -->
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
+    <span style="font-size:11px;color:var(--fg-muted);align-self:center;font-family:var(--font-mono);letter-spacing:0.04em;text-transform:uppercase;">Sampling Strategy:</span>
+    <button class="pill matrix-method-pill active" data-method="random">Random</button>
+    <button class="pill matrix-method-pill" data-method="stratified">Stratified</button>
+    <button class="pill matrix-method-pill" data-method="risk">Risk-Weighted</button>
+    <button class="pill matrix-method-pill" data-method="adversarial">Adversarial</button>
+  </div>
+
+  <!-- Strategy impact summary strip -->
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-header">
+      <span class="card-title">Sampling Impact</span>
+      <span id="matrixStrategyLabel" style="font-size:11px;color:var(--fg-muted);font-family:var(--font-mono);">Random Sampling</span>
+    </div>
+    <div class="card-body" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;" id="matrixImpactStrip"></div>
+  </div>
+
+  <!-- Heatmap grid -->
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-header">
+      <span class="card-title">Performance Heatmap</span>
+      <span style="font-size:11px;color:var(--fg-muted);">Cell color = metric intensity · darker = stronger signal</span>
+    </div>
+    <div class="card-body" style="padding:0;overflow-x:auto;">
+      <table id="matrixHeatmap" style="width:100%;border-collapse:collapse;min-width:600px;">
+        <thead id="matrixHead"></thead>
+        <tbody id="matrixBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Summary cards row -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:20px;">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Best Overall</span></div>
+      <div class="card-body">
+        <div id="matrixBest" style="font-size:13px;line-height:1.7;"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Hardest Queue</span></div>
+      <div class="card-body">
+        <div id="matrixHardQueue" style="font-size:13px;line-height:1.7;"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Weakest Batch</span></div>
+      <div class="card-body">
+        <div id="matrixWeakBatch" style="font-size:13px;line-height:1.7;"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">AI Agent Gap</span></div>
+      <div class="card-body">
+        <div id="matrixAiGap" style="font-size:13px;line-height:1.7;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full data table -->
+  <div class="card">
+    <div class="card-header"><span class="card-title">Raw Data — All Combinations</span></div>
+    <div class="card-body" style="padding:0;overflow-x:auto;">
+      <table id="matrixFullTable" style="width:100%;border-collapse:collapse;min-width:700px;">
+        <thead>
+          <tr>
+            <th>Batch</th>
+            <th>Profile</th>
+            <th>Queue</th>
+            <th>Precision</th>
+            <th>Recall</th>
+            <th>F1</th>
+            <th>Accuracy</th>
+            <th>FP</th>
+            <th>FN</th>
+            <th>Decided</th>
+            <th>Escalated</th>
+          </tr>
+        </thead>
+        <tbody id="matrixFullBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</div><!-- /tab-matrix -->
+
+<script>
+// ── Data ──────────────────────────────────────────────────────────────────────
+
+const SCENARIOS = {
+  hate: {
+    name: 'Hate Speech',
+    items: [
+      { id: 1, signal: 'Post uses slur targeting ethnic group', golden: 1 },
+      { id: 2, signal: 'User shares academic study on hate movements', golden: 0 },
+      { id: 3, signal: 'Comment calls for exclusion of religious minority', golden: 1 },
+      { id: 4, signal: 'Satirical meme referencing historical discrimination', golden: 0 },
+      { id: 5, signal: 'Profile bio contains coded white nationalist symbol', golden: 1 },
+      { id: 6, signal: 'News article shared about civil rights violations', golden: 0 },
+      { id: 7, signal: 'Post dehumanizes immigrants using animal comparisons', golden: 1 },
+      { id: 8, signal: 'User critiques immigration policy without slurs', golden: 0 },
+      { id: 9, signal: 'Reply targets disability with mocking language', golden: 1 },
+      { id: 10, signal: 'Comedy sketch about cultural stereotypes', golden: 0 },
+      { id: 11, signal: 'Thread coordinating harassment of LGBTQ+ creator', golden: 1 },
+      { id: 12, signal: 'User shares pride parade photos with positive caption', golden: 0 },
+      { id: 13, signal: 'Post equates ethnic group with criminals', golden: 1 },
+      { id: 14, signal: 'Documentary clip about historical genocide', golden: 0 },
+      { id: 15, signal: 'Reply uses gendered slur to attack commenter', golden: 1 },
+    ]
+  },
+  spam: {
+    name: 'Spam / Scam',
+    items: [
+      { id: 1, signal: 'DM offering crypto investment with guaranteed returns', golden: 1 },
+      { id: 2, signal: 'User promotes their own Etsy shop in comments', golden: 0 },
+      { id: 3, signal: 'Phishing link disguised as official Pinterest login', golden: 1 },
+      { id: 4, signal: 'Brand account sharing product announcement', golden: 0 },
+      { id: 5, signal: 'Bulk account posting identical comments across pins', golden: 1 },
+      { id: 6, signal: 'Influencer disclosing paid partnership in caption', golden: 0 },
+      { id: 7, signal: 'Fake giveaway requiring personal data submission', golden: 1 },
+      { id: 8, signal: 'Contest requiring follow + share for entry', golden: 0 },
+      { id: 9, signal: 'Romance scam using stolen model photos', golden: 1 },
+      { id: 10, signal: 'User sharing affiliate link with clear disclosure', golden: 0 },
+      { id: 11, signal: 'Bot network inflating engagement on political content', golden: 1 },
+      { id: 12, signal: 'Small creator asking followers to share their pin', golden: 0 },
+      { id: 13, signal: 'Fake tech support account offering account recovery', golden: 1 },
+      { id: 14, signal: 'Official brand account responding to customer DMs', golden: 0 },
+      { id: 15, signal: 'Advance-fee fraud targeting small business owners', golden: 1 },
+    ]
+  },
+  graphic: {
+    name: 'Graphic Violence',
+    items: [
+      { id: 1, signal: 'Video of real-world assault with no news context', golden: 1 },
+      { id: 2, signal: 'Movie fight scene from action film', golden: 0 },
+      { id: 3, signal: 'Injury gore posted with glorifying caption', golden: 1 },
+      { id: 4, signal: 'Medical procedure video shared by healthcare account', golden: 0 },
+      { id: 5, signal: 'Animal cruelty footage with no educational context', golden: 1 },
+      { id: 6, signal: 'Wildlife documentary showing predator hunting prey', golden: 0 },
+      { id: 7, signal: 'Violent threat paired with target\'s home address', golden: 1 },
+      { id: 8, signal: 'User venting frustration using violent hyperbole', golden: 0 },
+      { id: 9, signal: 'Self-harm instruction content with how-to steps', golden: 1 },
+      { id: 10, signal: 'Mental health awareness post sharing recovery story', golden: 0 },
+      { id: 11, signal: 'Combat footage from active conflict zone ungated', golden: 1 },
+      { id: 12, signal: 'Journalist sharing news photo from war reporting', golden: 0 },
+      { id: 13, signal: 'Graphic image used to threaten specific person', golden: 1 },
+      { id: 14, signal: 'Historical photo from museum collection', golden: 0 },
+      { id: 15, signal: 'Celebration of mass casualty event with graphic media', golden: 1 },
+    ]
+  },
+  csam: {
+    name: 'Minor Safety',
+    items: [
+      { id: 1, signal: 'Account systematically collecting minor\'s public posts', golden: 1 },
+      { id: 2, signal: 'Parent sharing child\'s school performance milestone', golden: 0 },
+      { id: 3, signal: 'Adult requesting private contact from minor commenter', golden: 1 },
+      { id: 4, signal: 'Teen creator sharing art project with peers', golden: 0 },
+      { id: 5, signal: 'Grooming script disguised as mentorship offer', golden: 1 },
+      { id: 6, signal: 'Educational account posting child safety tips', golden: 0 },
+      { id: 7, signal: 'Covert age solicitation in comment thread', golden: 1 },
+      { id: 8, signal: 'Family travel blog sharing vacation photos', golden: 0 },
+      { id: 9, signal: 'Account sharing suggestive content targeting minors', golden: 1 },
+      { id: 10, signal: 'Youth sports organization posting team photos', golden: 0 },
+      { id: 11, signal: 'User attempting to bypass age gate using minor\'s account', golden: 1 },
+      { id: 12, signal: 'Parent asking for parental control recommendations', golden: 0 },
+      { id: 13, signal: 'DM pattern matching known grooming escalation sequence', golden: 1 },
+      { id: 14, signal: 'Teen asking coding help in a public study group', golden: 0 },
+      { id: 15, signal: 'Peer-to-peer exploitation content sharing network', golden: 1 },
+    ]
+  }
+};
+
+// Reviewer batch profiles: for each item, confidence offset + flip tendency
+const BATCHES = {
+  A: { name: 'New hire cohort',    fpBias: 0.18, fnBias: 0.14, confMean: 0.62, confNoise: 0.15 },
+  B: { name: '6-month vendor team', fpBias: 0.10, fnBias: 0.08, confMean: 0.72, confNoise: 0.10 },
+  C: { name: 'Senior specialists',  fpBias: 0.05, fnBias: 0.04, confMean: 0.84, confNoise: 0.07 },
+  D: { name: 'AI Agent',           fpBias: 0.03, fnBias: 0.38, confMean: 0.91, confNoise: 0.04 },
+};
+
+// Seeded pseudo-random for reproducibility
+function mulberry32(a) {
+  return function() {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+function generateDecisions(scenario, batchKey, threshold) {
+  const items = SCENARIOS[scenario].items;
+  const batch = BATCHES[batchKey];
+  const rand = mulberry32(scenario.charCodeAt(0) * 100 + batchKey.charCodeAt(0));
+
+  return items.map(item => {
+    // Generate confidence score
+    let conf = batch.confMean + (rand() - 0.5) * batch.confNoise * 2;
+    conf = Math.min(0.97, Math.max(0.30, conf));
+
+    // Determine if reviewer flips
+    let flipProb = item.golden === 1 ? batch.fnBias : batch.fpBias;
+    // Low confidence items more likely to flip
+    if (conf < 0.55) flipProb += 0.12;
+    const flipped = rand() < flipProb;
+
+    const reviewerLabel = flipped ? (1 - item.golden) : item.golden;
+
+    // Items below threshold get escalated (treat as abstain — counted separately)
+    const escalated = conf < threshold;
+
+    return { ...item, conf: parseFloat(conf.toFixed(2)), reviewerLabel, escalated, flipped };
+  });
+}
+
+function computeMetrics(decisions) {
+  // Only count non-escalated decisions
+  const decided = decisions.filter(d => !d.escalated);
+  let tp = 0, fp = 0, fn = 0, tn = 0;
+  decided.forEach(d => {
+    if (d.golden === 1 && d.reviewerLabel === 1) tp++;
+    else if (d.golden === 0 && d.reviewerLabel === 1) fp++;
+    else if (d.golden === 1 && d.reviewerLabel === 0) fn++;
+    else tn++;
+  });
+  const precision = tp + fp > 0 ? tp / (tp + fp) : 0;
+  const recall = tp + fn > 0 ? tp / (tp + fn) : 0;
+  const f1 = precision + recall > 0 ? 2 * precision * recall / (precision + recall) : 0;
+  const accuracy = decided.length > 0 ? (tp + tn) / decided.length : 0;
+  return { tp, fp, fn, tn, precision, recall, f1, accuracy, decided: decided.length, escalated: decisions.length - decided.length };
+}
+
+function pct(v) { return (v * 100).toFixed(0) + '%'; }
+
+function getInsight(m, batchKey) {
+  const batch = BATCHES[batchKey];
+  if (m.precision < 0.70 && m.recall > 0.80) {
+    return `<strong>High false positive rate</strong> — ${batch.name} is over-flagging safe content (precision ${pct(m.precision)}). Recommend calibration session focused on policy boundary cases to reduce over-removal risk.`;
+  } else if (m.recall < 0.70 && m.precision > 0.80) {
+    return `<strong>High false negative rate</strong> — ${batch.name} is missing violations (recall ${pct(m.recall)}). Recommend targeted review of missed cases and re-calibration on ambiguous signals.`;
+  } else if (m.f1 > 0.85) {
+    return `<strong>Strong balanced performance</strong> — ${batch.name} is meeting quality targets (F1 ${pct(m.f1)}). Current calibration cadence is effective. Monitor for policy drift.`;
+  } else if (m.escalated > 5) {
+    return `<strong>High escalation volume</strong> — ${m.escalated} items fell below the confidence threshold and were routed to expert review. Consider lowering the threshold or additional training for gray-area cases.`;
+  } else {
+    return `<strong>Moderate performance</strong> — ${batch.name} shows room for improvement (F1 ${pct(m.f1)}). Error pattern analysis suggests split calibration sessions: one for precision errors, one for recall errors.`;
+  }
+}
+
+// ── PR Curve ──────────────────────────────────────────────────────────────────
+
+function drawPRCurve(scenario, batchKey, currentThreshold) {
+  const canvas = document.getElementById('prCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const pad = { top: 20, right: 20, bottom: 40, left: 50 };
+  const plotW = W - pad.left - pad.right;
+  const plotH = H - pad.top - pad.bottom;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Background
+  const isDark = document.documentElement.dataset.theme === 'dark' ||
+    (!document.documentElement.dataset.theme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  ctx.fillStyle = isDark ? '#181c26' : '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  const gridColor = isDark ? '#2a2f42' : '#dde1ed';
+  const textColor = isDark ? '#8890a6' : '#5c647a';
+  const curveColor = '#3b82f6';
+  const accentColor = '#e8522a';
+
+  // Grid lines
+  ctx.strokeStyle = gridColor;
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + (plotH * i / 4);
+    const x = pad.left + (plotW * i / 4);
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + plotW, y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x, pad.top); ctx.lineTo(x, pad.top + plotH); ctx.stroke();
+  }
+
+  // Axis labels
+  ctx.fillStyle = textColor;
+  ctx.font = '10px JetBrains Mono, monospace';
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= 4; i++) {
+    const v = (1 - i * 0.25).toFixed(2);
+    const y = pad.top + (plotH * i / 4);
+    ctx.fillText(v, pad.left - 6, y + 4);
+  }
+  ctx.textAlign = 'center';
+  for (let i = 0; i <= 4; i++) {
+    const v = (i * 0.25).toFixed(2);
+    const x = pad.left + (plotW * i / 4);
+    ctx.fillText(v, x, pad.top + plotH + 16);
+  }
+
+  // Axis titles
+  ctx.fillStyle = textColor;
+  ctx.font = '11px Inter, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Recall', pad.left + plotW / 2, H - 4);
+  ctx.save();
+  ctx.translate(12, pad.top + plotH / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText('Precision', 0, 0);
+  ctx.restore();
+
+  // Generate curve points across thresholds
+  const thresholds = [];
+  for (let t = 0.95; t >= 0.25; t -= 0.05) thresholds.push(parseFloat(t.toFixed(2)));
+
+  const points = thresholds.map(t => {
+    const decs = generateDecisions(scenario, batchKey, t);
+    const m = computeMetrics(decs);
+    return { t, r: m.recall, p: m.precision };
+  });
+
+  // Draw curve
+  ctx.strokeStyle = curveColor;
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  points.forEach((pt, i) => {
+    const x = pad.left + pt.r * plotW;
+    const y = pad.top + (1 - pt.p) * plotH;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // Current threshold dot
+  const curDecs = generateDecisions(scenario, batchKey, currentThreshold);
+  const curM = computeMetrics(curDecs);
+  const dotX = pad.left + curM.recall * plotW;
+  const dotY = pad.top + (1 - curM.precision) * plotH;
+
+  ctx.beginPath();
+  ctx.arc(dotX, dotY, 7, 0, Math.PI * 2);
+  ctx.fillStyle = accentColor;
+  ctx.fill();
+  ctx.strokeStyle = isDark ? '#0f1117' : '#f0f2f7';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Label dot
+  ctx.fillStyle = accentColor;
+  ctx.font = 'bold 10px JetBrains Mono, monospace';
+  ctx.textAlign = dotX > pad.left + plotW * 0.7 ? 'right' : 'left';
+  const labelX = dotX + (dotX > pad.left + plotW * 0.7 ? -12 : 12);
+  ctx.fillText(`t=${currentThreshold.toFixed(2)}`, labelX, dotY - 8);
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+
+let currentScenario = 'hate';
+let currentBatch = 'A';
+let currentThreshold = 0.50;
+
+function render() {
+  const decisions = generateDecisions(currentScenario, currentBatch, currentThreshold);
+  const m = computeMetrics(decisions);
+  const items = SCENARIOS[currentScenario].items;
+  const violating = items.filter(i => i.golden === 1).length;
+
+  // Golden dataset stats
+  document.getElementById('goldenTotal').textContent = items.length;
+  document.getElementById('goldenViolating').textContent = violating;
+  document.getElementById('prevalenceRate').textContent = (violating / items.length * 100).toFixed(0) + '%';
+
+  // Metrics
+  document.getElementById('metricPrecision').textContent = pct(m.precision);
+  document.getElementById('metricRecall').textContent = pct(m.recall);
+  document.getElementById('metricF1').textContent = pct(m.f1);
+  document.getElementById('metricAcc').textContent = pct(m.accuracy);
+  document.getElementById('batchLabel').textContent = `Batch ${currentBatch} · ${m.decided} decided · ${m.escalated} escalated`;
+
+  // Color F1 by quality
+  const f1El = document.getElementById('metricF1');
+  f1El.className = 'metric-value ' + (m.f1 >= 0.80 ? 'green' : m.f1 >= 0.65 ? 'yellow' : 'red');
+
+  // Insight
+  const insight = document.getElementById('insightBox');
+  insight.style.display = 'block';
+  insight.innerHTML = getInsight(m, currentBatch);
+
+  // Error breakdown
+  document.getElementById('countFP').textContent = m.fp;
+  document.getElementById('countFN').textContent = m.fn;
+  document.getElementById('countTP').textContent = m.tp;
+  document.getElementById('countTN').textContent = m.tn;
+
+  // Table
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+  decisions.forEach(d => {
+    const outcome = d.escalated ? 'ESC' :
+      (d.golden === 1 && d.reviewerLabel === 1) ? 'TP' :
+      (d.golden === 0 && d.reviewerLabel === 0) ? 'TN' :
+      (d.golden === 0 && d.reviewerLabel === 1) ? 'FP' : 'FN';
+
+    const goldenLabel = d.golden === 1 ? 'violating' : 'safe';
+    const reviewLabel = d.escalated ? 'escalated' : (d.reviewerLabel === 1 ? 'violating' : 'safe');
+
+    const confColor = d.conf >= 0.75 ? 'var(--green)' : d.conf >= 0.55 ? 'var(--yellow)' : 'var(--red)';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="font-family:var(--font-mono);color:var(--fg-muted);">${String(d.id).padStart(2,'0')}</td>
+      <td style="max-width:220px;line-height:1.4;">${d.signal}</td>
+      <td><span class="badge ${goldenLabel}">${goldenLabel}</span></td>
+      <td><span class="badge ${reviewLabel === 'escalated' ? '' : reviewLabel}" style="${reviewLabel==='escalated'?'background:var(--surface-2);color:var(--fg-muted);border:1px solid var(--border);':''}">${reviewLabel}</span></td>
+      <td>
+        <div class="conf-bar-wrap">
+          <div class="conf-bar-bg"><div class="conf-bar-fill" style="width:${d.conf*100}%;background:${confColor};"></div></div>
+          <span class="conf-val">${d.conf.toFixed(2)}</span>
+        </div>
+      </td>
+      <td><span class="badge ${outcome.toLowerCase()}" style="${outcome==='ESC'?'background:var(--surface-2);color:var(--fg-muted);':''}">${outcome}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // PR curve
+  drawPRCurve(currentScenario, currentBatch, currentThreshold);
+  document.getElementById('curveThr').textContent = currentThreshold.toFixed(2);
+
+  // Comparison
+  renderComparison();
+  renderQueueComparison();
+}
+
+// ── Events ────────────────────────────────────────────────────────────────────
+
+document.querySelectorAll('.pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    currentScenario = pill.dataset.scenario;
+    render();
+  });
+});
+
+document.getElementById('reviewerSelect').addEventListener('change', e => {
+  currentBatch = e.target.value;
+  render();
+});
+
+document.getElementById('threshSlider').addEventListener('input', e => {
+  currentThreshold = parseFloat(e.target.value);
+  document.getElementById('threshVal').textContent = currentThreshold.toFixed(2);
+  render();
+});
+
+document.getElementById('runBtn').addEventListener('click', render);
+
+function renderComparison() {
+  const scenarioName = SCENARIOS[currentScenario].name;
+  document.getElementById('compScenarioLabel').textContent = `${scenarioName} · threshold ${currentThreshold.toFixed(2)}`;
+
+  const tbody = document.getElementById('compBody');
+  tbody.innerHTML = '';
+
+  const rows = Object.entries(BATCHES).map(([key, batch]) => {
+    const decs = generateDecisions(currentScenario, key, currentThreshold);
+    const m = computeMetrics(decs);
+    return { key, batch, m };
+  });
+
+  // Find best F1 to highlight
+  const bestF1 = Math.max(...rows.map(r => r.m.f1));
+
+  rows.forEach(({ key, batch, m }) => {
+    const isBest = m.f1 === bestF1;
+    const f1Color = m.f1 >= 0.80 ? 'var(--green)' : m.f1 >= 0.65 ? 'var(--yellow)' : 'var(--red)';
+    const isAI = key === 'D';
+    const tr = document.createElement('tr');
+    if (isBest) tr.style.background = 'var(--surface-2)';
+    tr.innerHTML = `
+      <td style="font-family:var(--font-mono);font-weight:700;color:var(--accent);">
+        ${key}${isBest ? ' <span style="font-size:9px;color:var(--green);letter-spacing:0.06em;">BEST</span>' : ''}
+      </td>
+      <td style="color:var(--fg-muted);">
+        ${batch.name}${isAI ? ' <span style="font-size:9px;background:var(--blue-dim);color:var(--blue);padding:1px 5px;border-radius:3px;font-family:var(--font-mono);">AI</span>' : ''}
+      </td>
+      <td style="font-family:var(--font-mono);">${pct(m.precision)}</td>
+      <td style="font-family:var(--font-mono);">${pct(m.recall)}</td>
+      <td style="font-family:var(--font-mono);font-weight:700;color:${f1Color};">${pct(m.f1)}</td>
+      <td style="font-family:var(--font-mono);">${pct(m.accuracy)}</td>
+      <td style="font-family:var(--font-mono);color:var(--fg-muted);">${m.decided}</td>
+      <td style="font-family:var(--font-mono);color:var(--fg-muted);">${m.escalated}</td>
+      <td style="font-family:var(--font-mono);color:var(--red);">${m.fp}</td>
+      <td style="font-family:var(--font-mono);color:var(--yellow);">${m.fn}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Comparison insight
+  const aiRow = rows.find(r => r.key === 'D');
+  const seniorRow = rows.find(r => r.key === 'C');
+  let insight = '';
+  if (aiRow && seniorRow) {
+    if (aiRow.m.recall < seniorRow.m.recall - 0.10) {
+      insight = `<strong style="color:var(--accent);">AI blind spot detected</strong> — The AI Agent scores high precision but lower recall than Senior Specialists (${pct(aiRow.m.recall)} vs ${pct(seniorRow.m.recall)}). It's missing nuanced or context-dependent violations that human reviewers catch. Recommended hybrid: AI handles high-confidence clear cases, humans cover gray-area and low-confidence escalations.`;
+    } else if (aiRow.m.f1 >= seniorRow.m.f1) {
+      insight = `<strong style="color:var(--green);">AI Agent competitive</strong> — On this scenario the AI Agent matches or exceeds Senior Specialists (F1 ${pct(aiRow.m.f1)} vs ${pct(seniorRow.m.f1)}). Clear-signal content moderation is a strong candidate for AI-first review with human spot-check audits.`;
+    } else {
+      insight = `<strong style="color:var(--accent);">Human-AI gap present</strong> — Senior Specialists outperform the AI Agent on F1 (${pct(seniorRow.m.f1)} vs ${pct(aiRow.m.f1)}). The AI's high confidence scores mask recall failures on ambiguous cases. Calibration recommendation: route AI-decided cases back through golden set audit quarterly.`;
+    }
+  }
+  document.getElementById('compInsight').innerHTML = insight;
+}
+
+function renderQueueComparison() {
+  const batch = BATCHES[currentBatch];
+  document.getElementById('queueCompLabel').textContent = `Batch ${currentBatch} · ${batch.name} · t=${currentThreshold.toFixed(2)}`;
+
+  const tbody = document.getElementById('queueCompBody');
+  tbody.innerHTML = '';
+
+  const rows = Object.entries(SCENARIOS).map(([key, scenario]) => {
+    const decs = generateDecisions(key, currentBatch, currentThreshold);
+    const m = computeMetrics(decs);
+    return { key, scenario, m };
+  });
+
+  // Worst F1 for highlighting
+  const worstF1 = Math.min(...rows.map(r => r.m.f1));
+
+  // Risk label per scenario — higher stakes = higher harm from FN
+  const riskLevel = { hate: 'HIGH', spam: 'MED', graphic: 'HIGH', csam: 'CRITICAL' };
+  const riskColor = { HIGH: 'var(--red)', MED: 'var(--yellow)', CRITICAL: 'var(--accent)' };
+
+  rows.forEach(({ key, scenario, m }) => {
+    const isWorst = m.f1 === worstF1;
+    const f1Color = m.f1 >= 0.80 ? 'var(--green)' : m.f1 >= 0.65 ? 'var(--yellow)' : 'var(--red)';
+    const risk = riskLevel[key];
+    const tr = document.createElement('tr');
+    if (isWorst) tr.style.background = 'rgba(255,59,59,0.06)';
+    tr.innerHTML = `
+      <td style="font-weight:600;">
+        ${scenario.name}${isWorst ? ' <span style="font-size:9px;color:var(--red);letter-spacing:0.06em;">WORST</span>' : ''}
+      </td>
+      <td style="font-family:var(--font-mono);">${pct(m.precision)}</td>
+      <td style="font-family:var(--font-mono);">${pct(m.recall)}</td>
+      <td style="font-family:var(--font-mono);font-weight:700;color:${f1Color};">${pct(m.f1)}</td>
+      <td style="font-family:var(--font-mono);color:var(--red);">${m.fp}</td>
+      <td style="font-family:var(--font-mono);color:var(--yellow);">${m.fn}</td>
+      <td><span style="font-size:9px;font-weight:700;font-family:var(--font-mono);color:${riskColor[risk]};">${risk}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Insight: flag worst queue + whether it's a recall or precision problem
+  const worst = rows.reduce((a, b) => a.m.f1 < b.m.f1 ? a : b);
+  const problem = worst.m.recall < worst.m.precision ? 'recall' : 'precision';
+  const fix = problem === 'recall'
+    ? 'missing violations — calibration should focus on borderline cases in this category'
+    : 'over-flagging safe content — calibration should focus on policy boundary clarification';
+  document.getElementById('queueCompInsight').innerHTML =
+    `<strong style="color:var(--accent);">Weakest queue: ${worst.scenario.name}</strong> — ${BATCHES[currentBatch].name} has a ${problem} problem here (${pct(worst.m[problem])}), ${fix}.`;
+}
+
+// ── Sampling Tab ─────────────────────────────────────────────────────────────
+
+const SAMPLING_METHODS = {
+  random: {
+    name: 'Random Sampling',
+    queues: { hate: 25, spam: 25, graphic: 25, csam: 25 },
+    composition: [
+      { label: 'Clear violations', pct: 35, color: 'var(--red)' },
+      { label: 'Clear safe', pct: 35, color: 'var(--green)' },
+      { label: 'Ambiguous / edge', pct: 20, color: 'var(--yellow)' },
+      { label: 'Policy boundary', pct: 10, color: 'var(--blue)' },
+    ],
+    tradeoffs: {
+      coverage: 'Even across all queues — no queue is prioritized',
+      bias: 'Low sampling bias, but may underrepresent rare violation types',
+      rare: 'Weak — low-prevalence categories may get zero representation in small samples',
+      bestFor: 'Baseline audits, general calibration checks, new program setup',
+    },
+    insight: 'Random sampling is the starting point — unbiased but blind to prevalence. If CSAM violations represent 2% of content, a 100-item random sample may catch 0–2 cases. Not sufficient for high-stakes queues.',
+    pinterest: 'At Pinterest, random sampling makes sense for initial audit baselines on new content categories. For established queues like Spam, it gives a clean read on steady-state reviewer performance without introducing selection bias.',
+  },
+  stratified: {
+    name: 'Stratified Sampling',
+    queues: { hate: 30, spam: 20, graphic: 30, csam: 20 },
+    composition: [
+      { label: 'Clear violations', pct: 30, color: 'var(--red)' },
+      { label: 'Clear safe', pct: 30, color: 'var(--green)' },
+      { label: 'Ambiguous / edge', pct: 25, color: 'var(--yellow)' },
+      { label: 'Policy boundary', pct: 15, color: 'var(--blue)' },
+    ],
+    tradeoffs: {
+      coverage: 'Guaranteed representation across every defined stratum',
+      bias: 'Requires accurate category definitions — wrong strata = wrong coverage',
+      rare: 'Good — each stratum gets a fixed allocation regardless of natural prevalence',
+      bestFor: 'Multi-category queues, calibration audits, quarterly reviews',
+    },
+    insight: 'Stratified sampling ensures every content type gets coverage — even if Graphic Violence is rare in the queue, it still gets sampled. The tradeoff: you need to define your strata correctly upfront, and the results aren\'t directly comparable to natural queue distribution.',
+    pinterest: 'For Pinterest\'s Trust & Safety quality program, stratified sampling is the right default for calibration audits. Pinterest content spans vastly different categories — wellness, food, fashion, news — and violation types cluster differently per category. Stratification prevents the audit from being dominated by whatever\'s most common in the queue that week.',
+  },
+  risk: {
+    name: 'Risk-Weighted Sampling',
+    queues: { hate: 20, spam: 15, graphic: 25, csam: 40 },
+    composition: [
+      { label: 'Clear violations', pct: 25, color: 'var(--red)' },
+      { label: 'Clear safe', pct: 15, color: 'var(--green)' },
+      { label: 'Ambiguous / edge', pct: 35, color: 'var(--yellow)' },
+      { label: 'Policy boundary', pct: 25, color: 'var(--blue)' },
+    ],
+    tradeoffs: {
+      coverage: 'Deep on high-risk queues, shallow on low-risk — intentional imbalance',
+      bias: 'High — deliberately overrepresents harm-critical content',
+      rare: 'Excellent — designed specifically to surface rare high-harm violations',
+      bestFor: 'CSAM, terrorist content, imminent harm queues where FN cost is highest',
+    },
+    insight: 'Risk-weighted sampling accepts bias in exchange for harm reduction. By allocating 40% of the sample to Minor Safety despite it being a smaller queue, you maximize the chance of catching the most dangerous misses. The tradeoff: your overall precision/recall metrics won\'t reflect true queue distribution.',
+    pinterest: 'Pinterest should apply risk-weighted sampling to any queue where a false negative has irreversible harm — particularly Minor Safety and Graphic Violence. Missing one CSAM case is not equivalent to missing one spam post. This method is what I\'d use to build the golden dataset for high-stakes calibration sessions.',
+  },
+  adversarial: {
+    name: 'Adversarial Sampling',
+    queues: { hate: 28, spam: 22, graphic: 28, csam: 22 },
+    composition: [
+      { label: 'Clear violations', pct: 15, color: 'var(--red)' },
+      { label: 'Clear safe', pct: 15, color: 'var(--green)' },
+      { label: 'Ambiguous / edge', pct: 40, color: 'var(--yellow)' },
+      { label: 'Policy boundary', pct: 30, color: 'var(--blue)' },
+    ],
+    tradeoffs: {
+      coverage: 'Targeted at known weak spots — not representative of full queue',
+      bias: 'Very high by design — adversarial sets are intentionally unnatural',
+      rare: 'Excellent for known blind spots, blind to unknown ones',
+      bestFor: 'Post-calibration stress tests, pre-launch readiness checks, policy change audits',
+    },
+    insight: 'Adversarial sampling doesn\'t tell you how reviewers perform on average — it tells you where they break. A reviewer can hit 92% on a random sample and fail adversarial testing on policy boundary cases. This is the method to use before a major policy rollout or when you suspect a specific blind spot.',
+    pinterest: 'At Pinterest, I\'d use adversarial sampling specifically before launching a new content policy or onboarding a new BPO vendor cohort. It surfaces failure modes before they hit production. The 88→93% accuracy recovery at TikTok — the root cause was a policy update that created a new boundary case. Adversarial sampling would have caught that in pre-launch QA.',
+  },
+};
+
+let currentMethod = 'random';
+
+function renderSampling() {
+  const method = SAMPLING_METHODS[currentMethod];
+  document.getElementById('sampleMethodLabel').textContent = method.name;
+
+  // Queue bars
+  const queueBars = document.getElementById('queueBars');
+  queueBars.innerHTML = '';
+  const queueColors = { hate: 'var(--red)', spam: 'var(--yellow)', graphic: 'var(--accent)', csam: 'var(--blue)' };
+  const queueNames = { hate: 'Hate Speech', spam: 'Spam / Scam', graphic: 'Graphic Violence', csam: 'Minor Safety' };
+  Object.entries(method.queues).forEach(([key, pct]) => {
+    queueBars.innerHTML += `
+      <div class="queue-row">
+        <div class="queue-name">${queueNames[key]}</div>
+        <div class="queue-bar-bg"><div class="queue-bar-fill" style="width:${pct}%;background:${queueColors[key]};"></div></div>
+        <div class="queue-pct">${pct} items</div>
+      </div>`;
+  });
+
+  // Composition bar
+  const bar = document.getElementById('compositionBar');
+  bar.innerHTML = method.composition.map(s =>
+    `<div class="bar-seg" style="width:${s.pct}%;background:${s.color};"></div>`
+  ).join('');
+
+  // Legend
+  document.getElementById('compositionLegend').innerHTML = method.composition.map(s =>
+    `<div class="bar-legend-item"><div class="bar-legend-dot" style="background:${s.color};"></div>${s.label} (${s.pct}%)</div>`
+  ).join('');
+
+  // Tradeoffs
+  document.getElementById('tradeoffCoverage').textContent = method.tradeoffs.coverage;
+  document.getElementById('tradeoffBias').textContent = method.tradeoffs.bias;
+  document.getElementById('tradeoffRare').textContent = method.tradeoffs.rare;
+  document.getElementById('tradeoffBestFor').textContent = method.tradeoffs.bestFor;
+  document.getElementById('samplingInsight').innerHTML = `<strong>${method.name}:</strong> ${method.insight}`;
+  document.getElementById('pinterestApplication').textContent = method.pinterest;
+}
+
+// ── Full Matrix ───────────────────────────────────────────────────────────────
+
+let currentMatrixMethod = 'random';
+
+// Sampling strategy modifies which queue items get "seen" — simulated by
+// reweighting how many items from each queue feed into the evaluation.
+// We model this by running generateDecisions per queue then blending counts
+// proportionally to the strategy's queue allocation weights.
+function computeMatrixMetrics(batchKey, queueKey, samplingMethod, threshold) {
+  const decs = generateDecisions(queueKey, batchKey, threshold);
+  const allM = computeMetrics(decs);
+  const queueAlloc = SAMPLING_METHODS[samplingMethod].queues;
+  const totalAlloc = Object.values(queueAlloc).reduce((a,b)=>a+b,0);
+  // Scale factor: how much this queue is represented vs uniform (25%)
+  const uniformShare = 100 / Object.keys(queueAlloc).length;
+  const strategyShare = queueAlloc[queueKey] || uniformShare;
+  const scaleFactor = strategyShare / uniformShare; // >1 = oversampled, <1 = undersampled
+
+  // Sampling affects composition, which shifts apparent precision/recall:
+  // Oversampling a hard queue → more edge cases → lower precision, lower recall
+  // Undersampling a queue → fewer edge cases → metrics drift toward easy cases
+  // Adversarial pushes edge-case fraction up → recall drops more
+  const compEdge = SAMPLING_METHODS[samplingMethod].composition.find(c=>c.label.includes('edge'))?.pct || 20;
+  const compBoundary = SAMPLING_METHODS[samplingMethod].composition.find(c=>c.label.includes('boundary'))?.pct || 10;
+  const hardFraction = (compEdge + compBoundary) / 100; // 0.3 for random → 0.7 for adversarial
+
+  // Edge cases reduce precision and recall proportionally
+  const precisionAdj = allM.precision * (1 - hardFraction * 0.18 * scaleFactor);
+  const recallAdj    = allM.recall    * (1 - hardFraction * 0.14 * scaleFactor);
+  const p = Math.min(0.99, Math.max(0.10, precisionAdj));
+  const r = Math.min(0.99, Math.max(0.10, recallAdj));
+  const f1 = p + r > 0 ? 2*p*r/(p+r) : 0;
+
+  // FP/FN scale with how many items in this queue under this strategy
+  const nItems = Math.round(decs.length * strategyShare / uniformShare);
+  const violating = SCENARIOS[queueKey].items.filter(i=>i.golden===1).length / SCENARIOS[queueKey].items.length;
+  const fpEst = Math.round(nItems * (1 - violating) * (1 - p));
+  const fnEst = Math.round(nItems * violating * (1 - r));
+
+  return { precision:p, recall:r, f1, accuracy:(p+r)/2,
+           fp:fpEst, fn:fnEst, decided:nItems, escalated: allM.escalated,
+           scaleFactor, hardFraction };
+}
+
+function renderMatrix() {
+  const metric = document.getElementById('matrixMetricSelect').value;
+  document.getElementById('matrixThrLabel').textContent = currentThreshold.toFixed(2);
+  document.getElementById('matrixStrategyLabel').textContent = SAMPLING_METHODS[currentMatrixMethod].name;
+
+  const batchKeys = Object.keys(BATCHES);
+  const queueKeys = Object.keys(SCENARIOS);
+
+  // Build full results grid [batch][queue] — sampling-aware
+  const grid = {};
+  batchKeys.forEach(bk => {
+    grid[bk] = {};
+    queueKeys.forEach(qk => {
+      grid[bk][qk] = computeMatrixMetrics(bk, qk, currentMatrixMethod, currentThreshold);
+    });
+  });
+
+  // ── Impact strip: show how this strategy shifts each queue vs random baseline ──
+  const strip = document.getElementById('matrixImpactStrip');
+  strip.innerHTML = '';
+  const methodData = SAMPLING_METHODS[currentMatrixMethod];
+  const totalAlloc = Object.values(methodData.queues).reduce((a,b)=>a+b,0);
+  queueKeys.forEach(qk => {
+    const share = methodData.queues[qk];
+    const uniformShare = totalAlloc / queueKeys.length;
+    const delta = share - uniformShare;
+    const deltaSign = delta >= 0 ? '+' : '';
+    const deltaColor = delta > 5 ? 'var(--accent)' : delta < -5 ? 'var(--blue)' : 'var(--fg-muted)';
+    const avgF1 = batchKeys.reduce((s,bk)=>s+grid[bk][qk].f1,0)/batchKeys.length;
+    strip.innerHTML += `
+      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:12px;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--fg-muted);margin-bottom:6px;font-family:var(--font-mono);">${SCENARIOS[qk].name}</div>
+        <div style="font-family:var(--font-mono);font-size:18px;font-weight:700;color:var(--fg);">${share} items</div>
+        <div style="font-size:11px;color:${deltaColor};font-family:var(--font-mono);margin-top:2px;">${deltaSign}${delta} vs uniform</div>
+        <div style="font-size:11px;color:var(--fg-muted);margin-top:6px;">Avg F1 across batches: <span style="font-family:var(--font-mono);color:var(--fg);">${pct(avgF1)}</span></div>
+      </div>`;
+  });
+  // Add strategy composition summary
+  const compSummary = methodData.composition.map(c=>`${c.label} ${c.pct}%`).join(' · ');
+  strip.innerHTML += `
+    <div style="background:var(--accent-dim);border:1px solid rgba(232,82,42,0.25);border-radius:8px;padding:12px;grid-column:span 1;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;font-family:var(--font-mono);">Composition</div>
+      <div style="font-size:11px;color:var(--fg-muted);line-height:1.6;">${compSummary}</div>
+      <div style="font-size:11px;color:var(--fg-muted);margin-top:6px;line-height:1.5;">${methodData.tradeoffs.bestFor}</div>
+    </div>`;
+
+  // ── Heatmap ──
+  const metricLabel = { f1:'F1', precision:'Precision', recall:'Recall', fn:'False Neg', fp:'False Pos' };
+  const isInverse = metric === 'fn' || metric === 'fp'; // higher = worse
+
+  // Get all values for color scaling
+  const allVals = batchKeys.flatMap(bk => queueKeys.map(qk => grid[bk][qk][metric]));
+  const minV = Math.min(...allVals), maxV = Math.max(...allVals);
+
+  function cellColor(v) {
+    const norm = maxV === minV ? 0.5 : (v - minV) / (maxV - minV);
+    const intensity = isInverse ? norm : (1 - norm); // green=good, red=bad
+    // good: green tint, bad: red tint
+    const good = isInverse ? (1 - norm) : norm;
+    if (good > 0.6) return `rgba(34,197,94,${0.08 + good * 0.3})`;
+    if (good > 0.35) return `rgba(245,158,11,${0.08 + 0.2})`;
+    return `rgba(255,59,59,${0.08 + (1-good) * 0.3})`;
+  }
+  function cellTextColor(v) {
+    const good = isInverse ? 1 - (maxV===minV ? 0.5 : (v-minV)/(maxV-minV))
+                           : (maxV===minV ? 0.5 : (v-minV)/(maxV-minV));
+    if (good > 0.6) return 'var(--green)';
+    if (good > 0.35) return 'var(--yellow)';
+    return 'var(--red)';
+  }
+  function fmtVal(v, m) {
+    if (m === 'fn' || m === 'fp') return v;
+    return pct(v);
+  }
+
+  // Build heatmap header
+  const thead = document.getElementById('matrixHead');
+  thead.innerHTML = `<tr>
+    <th style="min-width:120px;">Batch</th>
+    ${queueKeys.map(qk => `<th style="text-align:center;">${SCENARIOS[qk].name}</th>`).join('')}
+    <th style="text-align:center;">Avg ${metricLabel[metric]}</th>
+  </tr>`;
+
+  // Build heatmap body
+  const tbody = document.getElementById('matrixBody');
+  tbody.innerHTML = '';
+  batchKeys.forEach(bk => {
+    const batch = BATCHES[bk];
+    const qVals = queueKeys.map(qk => grid[bk][qk][metric]);
+    const avg = qVals.reduce((a, b) => a + b, 0) / qVals.length;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="font-weight:700;white-space:nowrap;">
+        <span style="font-family:var(--font-mono);color:var(--accent);">${bk}</span>
+        <span style="font-size:11px;color:var(--fg-muted);margin-left:6px;">${batch.name}</span>
+        ${bk==='D'?'<span style="font-size:9px;background:var(--blue-dim);color:var(--blue);padding:1px 5px;border-radius:3px;font-family:var(--font-mono);margin-left:4px;">AI</span>':''}
+      </td>
+      ${queueKeys.map((qk, i) => {
+        const v = qVals[i];
+        return `<td style="text-align:center;background:${cellColor(v)};font-family:var(--font-mono);font-weight:700;color:${cellTextColor(v)};font-size:14px;">${fmtVal(v, metric)}</td>`;
+      }).join('')}
+      <td style="text-align:center;font-family:var(--font-mono);font-weight:700;color:var(--fg-muted);font-size:13px;">${fmtVal(metric==='fn'||metric==='fp' ? Math.round(avg) : avg, metric)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // ── Summary cards ──
+  // Best overall: highest avg F1
+  const batchAvgF1 = batchKeys.map(bk => ({
+    bk,
+    avg: queueKeys.reduce((s, qk) => s + grid[bk][qk].f1, 0) / queueKeys.length
+  }));
+  const bestBatch = batchAvgF1.reduce((a,b) => a.avg > b.avg ? a : b);
+  document.getElementById('matrixBest').innerHTML =
+    `<span style="font-family:var(--font-mono);font-size:18px;font-weight:700;color:var(--green);">Batch ${bestBatch.bk}</span><br>
+     <span style="color:var(--fg-muted);">${BATCHES[bestBatch.bk].name}</span><br>
+     <span style="font-family:var(--font-mono);color:var(--fg);">Avg F1 ${pct(bestBatch.avg)} across all queues</span>`;
+
+  // Hardest queue: lowest avg F1
+  const queueAvgF1 = queueKeys.map(qk => ({
+    qk,
+    avg: batchKeys.reduce((s, bk) => s + grid[bk][qk].f1, 0) / batchKeys.length
+  }));
+  const hardQueue = queueAvgF1.reduce((a,b) => a.avg < b.avg ? a : b);
+  document.getElementById('matrixHardQueue').innerHTML =
+    `<span style="font-family:var(--font-mono);font-size:15px;font-weight:700;color:var(--red);">${SCENARIOS[hardQueue.qk].name}</span><br>
+     <span style="font-family:var(--font-mono);color:var(--fg);">Avg F1 ${pct(hardQueue.avg)} — lowest across all batches</span><br>
+     <span style="color:var(--fg-muted);font-size:12px;">Most challenging queue to review accurately</span>`;
+
+  // Weakest batch: lowest avg F1
+  const weakBatch = batchAvgF1.reduce((a,b) => a.avg < b.avg ? a : b);
+  document.getElementById('matrixWeakBatch').innerHTML =
+    `<span style="font-family:var(--font-mono);font-size:18px;font-weight:700;color:var(--yellow);">Batch ${weakBatch.bk}</span><br>
+     <span style="color:var(--fg-muted);">${BATCHES[weakBatch.bk].name}</span><br>
+     <span style="font-family:var(--font-mono);color:var(--fg);">Avg F1 ${pct(weakBatch.avg)} — needs calibration priority</span>`;
+
+  // AI vs best human gap per queue
+  const aiVsHuman = queueKeys.map(qk => {
+    const aiF1 = grid['D'][qk].f1;
+    const aiRecall = grid['D'][qk].recall;
+    const humanF1 = Math.max(...['A','B','C'].map(bk => grid[bk][qk].f1));
+    const humanRecall = Math.max(...['A','B','C'].map(bk => grid[bk][qk].recall));
+    return { qk, aiF1, humanF1, aiRecall, humanRecall, recallGap: humanRecall - aiRecall };
+  });
+  const worstRecallGap = aiVsHuman.reduce((a,b) => a.recallGap > b.recallGap ? a : b);
+  document.getElementById('matrixAiGap').innerHTML =
+    `<span style="color:var(--fg-muted);">Largest recall gap in <strong style="color:var(--fg);">${SCENARIOS[worstRecallGap.qk].name}</strong></span><br>
+     <span style="font-family:var(--font-mono);">AI: <span style="color:var(--red);">${pct(worstRecallGap.aiRecall)}</span> vs Human: <span style="color:var(--green);">${pct(worstRecallGap.humanRecall)}</span></span><br>
+     <span style="color:var(--fg-muted);font-size:12px;">AI misses nuanced context-dependent violations this queue contains</span>`;
+
+  // ── Full data table ──
+  // Update header to include sampling column
+  document.querySelector('#matrixFullTable thead tr').innerHTML = `
+    <th>Batch</th><th>Profile</th><th>Queue</th><th>Sampling</th>
+    <th>Precision</th><th>Recall</th><th>F1</th><th>Accuracy</th>
+    <th>FP</th><th>FN</th><th>n Items</th>
+  `;
+
+  const fullBody = document.getElementById('matrixFullBody');
+  fullBody.innerHTML = '';
+  const methodName = SAMPLING_METHODS[currentMatrixMethod].name;
+  batchKeys.forEach(bk => {
+    queueKeys.forEach((qk, qi) => {
+      const m = grid[bk][qk];
+      const f1Color = m.f1 >= 0.80 ? 'var(--green)' : m.f1 >= 0.65 ? 'var(--yellow)' : 'var(--red)';
+      const tr = document.createElement('tr');
+      if (qi === 0) tr.style.borderTop = '2px solid var(--border)';
+      tr.innerHTML = `
+        ${qi === 0 ? `<td rowspan="${queueKeys.length}" style="font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--accent);vertical-align:middle;text-align:center;border-right:1px solid var(--border);">${bk}</td>
+          <td rowspan="${queueKeys.length}" style="color:var(--fg-muted);vertical-align:middle;border-right:1px solid var(--border);white-space:nowrap;">${BATCHES[bk].name}${bk==='D'?' <span style="font-size:9px;background:var(--blue-dim);color:var(--blue);padding:1px 5px;border-radius:3px;font-family:var(--font-mono);">AI</span>':''}</td>` : ''}
+        <td style="font-weight:600;">${SCENARIOS[qk].name}</td>
+        <td style="font-size:11px;color:var(--fg-muted);font-family:var(--font-mono);">${methodName}</td>
+        <td style="font-family:var(--font-mono);">${pct(m.precision)}</td>
+        <td style="font-family:var(--font-mono);">${pct(m.recall)}</td>
+        <td style="font-family:var(--font-mono);font-weight:700;color:${f1Color};">${pct(m.f1)}</td>
+        <td style="font-family:var(--font-mono);">${pct(m.accuracy)}</td>
+        <td style="font-family:var(--font-mono);color:var(--red);">${m.fp}</td>
+        <td style="font-family:var(--font-mono);color:var(--yellow);">${m.fn}</td>
+        <td style="font-family:var(--font-mono);color:var(--fg-muted);">${m.decided}</td>
+      `;
+      fullBody.appendChild(tr);
+    });
+  });
+}
+
+document.getElementById('matrixMetricSelect').addEventListener('change', renderMatrix);
+
+document.querySelectorAll('.matrix-method-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.matrix-method-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    currentMatrixMethod = pill.dataset.method;
+    renderMatrix();
+  });
+});
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'sampling') renderSampling();
+    if (btn.dataset.tab === 'matrix') renderMatrix();
+  });
+});
+
+document.querySelectorAll('.method-card').forEach(card => {
+  card.addEventListener('click', () => {
+    document.querySelectorAll('.method-card').forEach(c => c.classList.remove('active'));
+    card.classList.add('active');
+    currentMethod = card.dataset.method;
+    renderSampling();
+  });
+});
+
+// Initial render
+render();
+</script>
